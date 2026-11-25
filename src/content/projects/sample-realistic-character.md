@@ -1,15 +1,16 @@
 ---
-title: Sample Project 01 — Realistic Character
+title: Eloise
 slug: sample-realistic-character
 status: published
 featured: true
 order: 10
 placeholder: true
-summary: "[Placeholder] One or two sentences describing the character and the goal of the project. This appears on cards and at the top of the project page."
+summary: "[Placeholder] One or two sentences describing the character and the
+  goal of the project. This appears on cards and at the top of the project
+  page."
 category: realistic-characters
 classification: personal
-studio: ""
-completed: "2026-01-15"
+completed: 2026-01-15
 tags:
   - Placeholder
 software:
@@ -31,7 +32,6 @@ renders:
   - image: /src/assets/artwork/placeholders/render-portrait-b.jpg
     alt: Placeholder final render, three-quarter view
     caption: Final render — three-quarter
-gallery: []
 sculpts:
   - image: /src/assets/artwork/placeholders/sculpt.jpg
     alt: Placeholder high-poly ZBrush sculpt
@@ -44,20 +44,19 @@ textures:
   - image: /src/assets/artwork/placeholders/textures.jpg
     alt: Placeholder texture map breakdown
     caption: Texture breakdown
-videos: []
-model: null
+model:
+  autoRotate: true
 artstation: https://www.artstation.com/parthdhulia
 credits:
   - name: "[Placeholder] Concept by — name"
     role: Concept art
-    url: ""
-copyright: "[Placeholder] Character concept © its original creator. Sculpt and render by Parth Dhulia."
-relatedGame: ""
+copyright: "[Placeholder] Character concept © its original creator. Sculpt and
+  render by Parth Dhulia."
 ---
-
 **[Placeholder]** Use this area for the detailed project write-up: the brief, references and concept, key challenges, what you learned, and technical notes such as poly counts, texture resolutions and render engine.
 
 Formatting such as **bold**, *italic*, lists and links is supported.
 
-- Triangle count: _e.g. 45k_
-- Texture sets: _e.g. 4 × 4K_
+- Triangle count: *e.g. 45k*
+- Texture sets: *e.g. 4 × 4K*
+
