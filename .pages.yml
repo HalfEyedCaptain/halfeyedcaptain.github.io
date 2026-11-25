@@ -80,7 +80,7 @@ content:
       - name: slug
         label: URL slug
         type: string
-        description: "Optional. The web address of the project, e.g. 'forest-guardian' → /portfolio/forest-guardian/. Leave empty to use the file name."
+        description: "Optional. The web address of the project, e.g. 'forest-guardian' → /work/forest-guardian/. Leave empty to use the file name."
       - name: status
         label: Status
         type: select
@@ -864,7 +864,7 @@ content:
             label: Label
             type: string
           - name: href
-            label: Link (e.g. /portfolio)
+            label: Link (e.g. /work)
             type: string
           - name: header
             label: Show in header

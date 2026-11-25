@@ -44,7 +44,7 @@ if (includeEmail && profile.email) {
           <li>
             <a
               href={l.href}
-              class="inline-flex h-10 w-10 items-center justify-center text-bone-300 transition-colors hover:text-copper-400"
+              class="inline-flex h-10 w-10 items-center justify-center text-fg-muted transition-colors hover:text-primary"
               rel="me noopener"
               target={l.href.startsWith('mailto:') ? undefined : '_blank'}
             >
@@ -55,19 +55,19 @@ if (includeEmail && profile.email) {
         ))}
       </ul>
     ) : (
-      <ul class:list={['divide-y divide-ink-700 border-y border-ink-700', className]}>
+      <ul class:list={['divide-y divide-line border-y border-line', className]}>
         {links.map((l) => (
           <li>
             <a
               href={l.href}
-              class="group flex items-center gap-4 py-4 transition-colors hover:text-copper-400"
+              class="group flex items-center gap-4 py-4 transition-colors hover:text-primary"
               rel="me noopener"
               target={l.href.startsWith('mailto:') ? undefined : '_blank'}
             >
-              <Icon name={l.icon} size={18} class="text-bone-500 group-hover:text-copper-400" />
-              <span class="label w-28 shrink-0 group-hover:text-copper-400">{l.label}</span>
-              <span class="min-w-0 flex-1 truncate text-bone-100">{l.display}</span>
-              <Icon name="arrow-up-right" size={16} class="text-bone-500 group-hover:text-copper-400" />
+              <Icon name={l.icon} size={18} class="text-fg-subtle group-hover:text-primary" />
+              <span class="label w-28 shrink-0 group-hover:text-primary">{l.label}</span>
+              <span class="min-w-0 flex-1 truncate text-fg">{l.display}</span>
+              <Icon name="arrow-up-right" size={16} class="text-fg-subtle group-hover:text-primary" />
             </a>
           </li>
         ))}

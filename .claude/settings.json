@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell($s=\"C:\\\\Users\\\\bhara\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\19daba891fb2e0c8\\\\911e0125-ebef-43b9-b909-440ee7d3d7d4\\\\scratchpad\"; New-Item -ItemType Directory -Force \"$s\\\\shots\" | Out-Null; node \"$s\\\\shots.mjs\" \"f:\\\\code\\\\git-repo\\\\parthdhulia.github.io\" \"$s\\\\shots\" / /about /portfolio /resume)",
+      "PowerShell(node \"C:\\\\Users\\\\bhara\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\19daba891fb2e0c8\\\\911e0125-ebef-43b9-b909-440ee7d3d7d4\\\\scratchpad\\\\dbg.mjs\" \"f:\\\\code\\\\git-repo\\\\parthdhulia.github.io\")"
+    ]
+  }
+}

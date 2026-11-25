@@ -99,8 +99,8 @@ Built with Astro, deployed to GitHub Pages and edited by the artist through **Pa
 | URL | Source |
 | --- | --- |
 | `/` | `pages/index.astro` |
-| `/portfolio/` | Filterable, sortable gallery with fullscreen preview |
-| `/portfolio/<slug>/` | Generated for every visible project |
+| `/work/` | Large preview box + square project tiles (hover to preview), category filter. `/portfolio/…` redirects here. |
+| `/work/<slug>/` | Generated for every visible project |
 | `/resume/` | Online résumé + print stylesheet |
 | `/<pdfFileName>` | Résumé PDF (generated in CI) |
 | `/about/`, `/games/`, `/contact/` | Static pages driven by data files |

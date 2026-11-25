@@ -11,7 +11,7 @@ import PlaceholderBadge from '@/components/PlaceholderBadge.astro';
 import ProjectGallery from '@/components/ProjectGallery.astro';
 import VideoEmbed from '@/components/VideoEmbed.astro';
 import { getGames, getProfile, getProjects, type Project } from '@/lib/content';
-import { formatMonthYear } from '@/lib/dates';
+import { formatMonthYear, formatYear } from '@/lib/dates';
 import { localImage } from '@/lib/images';
 import { absoluteUrl, url } from '@/lib/site';
 import { creativeWorkLd } from '@/lib/structured-data';
@@ -26,6 +26,7 @@ export const getStaticPaths = (async () => {
       next: projects[i + 1] ?? projects[0],
       total: projects.length,
       index: i,
+      all: projects,
     },
   }));
 }) satisfies GetStaticPaths;
@@ -36,9 +37,10 @@ interface Props {
   next: Project | undefined;
   total: number;
   index: number;
+  all: Project[];
 }
 
-const { project, prev, next, total, index } = Astro.props;
+const { project, prev, next, total, index, all } = Astro.props;
 const d = project.data;
 const profile = await getProfile();
 const entry = await getEntry('projects', project.id);
@@ -52,12 +54,16 @@ let ldImage: string | undefined;
 const heroMeta = localImage(hero?.src);
 if (heroMeta) ldImage = absoluteUrl((await getImage({ src: heroMeta, width: 1600, format: 'jpg' })).src, Astro.site);
 
-const facts = [
-  project.categoryInfo && { k: 'Category', v: project.categoryInfo.label },
-  { k: 'Type', v: d.classification === 'professional' ? 'Professional' : 'Personal' },
+const thumbOf = (p: Project) => p.data.thumbnail ?? p.data.hero ?? p.data.renders[0];
+const meta = [project.categoryInfo?.label, formatYear(d.completed)].filter(Boolean).join(' // ');
+const subtitle = d.studio || (d.classification === 'professional' ? 'Professional project' : 'Personal project');
+type Spec = { k: string; v: string; href?: string | undefined };
+const specs = [
+  d.software.length > 0 && { k: 'Software', v: d.software.join(', ') },
   d.studio && { k: 'Studio / client', v: d.studio },
   d.completed && { k: 'Completed', v: formatMonthYear(d.completed) },
-].filter((x): x is { k: string; v: string } => Boolean(x));
+  game && { k: 'Game', v: game.data.title, href: url(`/games#${game.id}`) },
+].filter((x): x is Spec => Boolean(x));
 
 const sections = [
   { key: 'renders', title: 'Final renders', label: 'Renders', images: d.renders, layout: 'stack' as const },
@@ -80,142 +86,162 @@ const pad = (n: number) => String(n).padStart(2, '0');
   jsonLd={creativeWorkLd(project, profile, Astro.site, ldImage)}
 >
   <article>
-    <!-- Hero -->
-    <header class="container-page pt-10 md:pt-16">
-      <nav aria-label="Breadcrumb" class="label mb-8 flex items-center gap-2">
-        <a href={url('/portfolio')} class="hover:text-bone-100">Portfolio</a>
-        <span aria-hidden="true">/</span>
-        {project.categoryInfo && (
-          <>
-            <a href={url(`/portfolio?category=${project.categoryInfo.id}`)} class="hover:text-bone-100">{project.categoryInfo.label}</a>
-            <span aria-hidden="true">/</span>
-          </>
-        )}
-        <span class="text-bone-300" aria-current="page">{pad(index + 1)} of {pad(total)}</span>
-      </nav>
-      <div class="flex flex-wrap items-center gap-3">
-        <PlaceholderBadge show={d.placeholder} />
-        {d.status === 'draft' && <span class="placeholder-badge !bg-bone-100">Draft — visible only in local preview</span>}
-      </div>
-      <h1 class="display mt-4 max-w-5xl text-display-lg">{d.title}</h1>
-      {d.summary && <p class="mt-6 max-w-2xl text-lg text-bone-300">{d.summary}</p>}
-    </header>
-
-    {
-      hero && (
-        <div class="mx-auto mt-12 max-w-[110rem] px-0 md:px-(--gutter)">
-          <button
-            type="button"
-            class="block w-full cursor-zoom-in"
-            data-lightbox-item
-            data-group="hero"
-            data-src={heroMeta ? (await getImage({ src: heroMeta, width: Math.min(heroMeta.width, 2400), format: 'webp', quality: 86 })).src : hero.src}
-            data-original={heroMeta?.src ?? hero.src}
-            data-alt={hero.alt || d.title}
-            data-caption={hero.caption ?? d.title}
-            aria-label={`View fullscreen: ${hero.alt || d.title}`}
-          >
-            <ArtImage src={hero.src} alt={hero.alt || d.title} widths={[768, 1280, 1920, 2560]} sizes="(min-width: 1760px) 1760px, 100vw" priority fit="contain" maxHeight="86svh" />
-          </button>
+    <!-- Detail hero (design: work_detail.html): title & navigation | render | overview & specs -->
+    <div class="container-page grid items-stretch gap-gutter-xl lg:grid-cols-12 reference-detail">
+      <!-- Left: back, title, prev / next -->
+      <section class="flex flex-col justify-between gap-gutter-xl lg:col-span-4 lg:border-r lg:border-line lg:py-gutter-md lg:pr-gutter-xl">
+        <div class="flex flex-col gap-gutter-md">
+          <a href={url('/work')} class="inline-flex w-fit items-center gap-gutter-xs font-mono text-label-md text-fg-muted uppercase transition-colors hover:text-primary">
+            <Icon name="arrow-left" size={16} /> Back to Work
+          </a>
+          <div class="flex flex-col gap-gutter-xs pt-gutter-lg">
+            {meta && <p class="font-mono text-label-md text-fg-muted uppercase">{meta}</p>}
+            <h1 class="display text-display-md text-balance text-fg">{d.title}</h1>
+            <p class="text-body-lg font-medium text-primary">{subtitle}</p>
+            <div class="mt-gutter-sm flex flex-wrap gap-gutter-sm">
+              <PlaceholderBadge show={d.placeholder} />
+              {d.status === 'draft' && <span class="placeholder-badge !bg-fg !text-surface">Draft — visible only in local preview</span>}
+            </div>
+          </div>
         </div>
-      )
-    }
-
-    <!-- Overview -->
-    <div class="container-page mt-16 grid gap-12 md:mt-24 lg:grid-cols-[1fr_22rem] lg:gap-24">
-      <div>
-        {
-          hasBody && Content ? (
-            <div class="prose-art">
-              <Content />
-            </div>
-          ) : (
-            d.summary && <p class="prose-art">{d.summary}</p>
-          )
-        }
-      </div>
-
-      <aside class="space-y-8 lg:sticky lg:top-28 lg:self-start" aria-label="Project details">
-        <dl class="divide-y divide-ink-700 border-y border-ink-700">
-          {
-            facts.map((f) => (
-              <div class="flex justify-between gap-6 py-3">
-                <dt class="label">{f.k}</dt>
-                <dd class="text-right text-sm text-bone-100">{f.v}</dd>
-              </div>
-            ))
-          }
-          {
-            game && (
-              <div class="flex justify-between gap-6 py-3">
-                <dt class="label">Game</dt>
-                <dd class="text-right text-sm">
-                  <a href={url(`/games#${game.id}`)} class="text-bone-100 link-underline">
-                    {game.data.title}
-                  </a>
-                </dd>
-              </div>
-            )
-          }
-        </dl>
 
         {
-          d.software.length > 0 && (
-            <div>
-              <h2 class="label mb-3">Software</h2>
-              <ul class="flex flex-wrap gap-2">
-                {d.software.map((s) => (
-                  <li class="border border-ink-700 px-3 py-1.5 text-sm">{s}</li>
-                ))}
-              </ul>
-            </div>
-          )
-        }
-
-        {
-          d.responsibilities.length > 0 && (
-            <div>
-              <h2 class="label mb-3">Responsibilities</h2>
-              <ul class="prose-art !text-sm">
-                {d.responsibilities.map((r) => (
-                  <li>{r}</li>
-                ))}
-              </ul>
-            </div>
-          )
-        }
-
-        {
-          d.credits.length > 0 && (
-            <div>
-              <h2 class="label mb-3">Credits</h2>
-              <ul class="space-y-2 text-sm">
-                {d.credits.map((c) => (
+          total > 1 && prev && next && (
+            <nav class="flex flex-col gap-gutter-sm" aria-label="Project navigation">
+              <a href={url(`/work/${next.slug}`)} rel="next" class="nav-card group">
+                <span class="h-16 w-20 shrink-0 overflow-hidden rounded-sm bg-inverse">
+                  <ArtImage src={thumbOf(next)?.src} alt="" class="h-full w-full" aspect="auto" position="top" widths={[160]} sizes="80px" imgClass="transition-transform duration-220 group-hover:scale-105" />
+                </span>
+                <span class="flex min-w-0 flex-1 flex-col gap-gutter-xs">
+                  <span class="font-mono text-label-md text-fg-muted uppercase">Next</span>
+                  <span class="display truncate text-title-lg text-fg group-hover:text-primary">{next.data.title}</span>
+                </span>
+                <Icon name="arrow-right" size={20} class="mr-gutter-sm shrink-0 text-fg-muted transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+              </a>
+              <a href={url(`/work/${prev.slug}`)} rel="prev" class="nav-card group !py-gutter-xs">
+                <Icon name="arrow-left" size={16} class="ml-gutter-sm shrink-0 text-fg-muted transition-transform group-hover:-translate-x-0.5 group-hover:text-primary" />
+                <span class="font-mono text-label-md text-fg-muted uppercase">Previous</span>
+                <span class="min-w-0 flex-1 truncate text-body-md text-fg group-hover:text-primary">{prev.data.title}</span>
+              </a>
+              <ol class="mt-gutter-sm flex flex-wrap items-center gap-gutter-sm" aria-label={`Project ${index + 1} of ${total}`}>
+                {all.map((p, j) => (
                   <li>
-                    {c.role && <span class="text-bone-500">{c.role} — </span>}
-                    {c.url ? (
-                      <a href={c.url} class="text-bone-100 link-underline" target="_blank" rel="noopener">
-                        {c.name}
-                      </a>
-                    ) : (
-                      <span class="text-bone-100">{c.name}</span>
-                    )}
+                    <a
+                      href={url(`/work/${p.slug}`)}
+                      class:list={['block h-2.5 w-2.5 rotate-45 transition-colors', j === index ? 'bg-primary-bright' : 'border border-line-strong hover:bg-primary']}
+                      aria-label={p.data.title}
+                      aria-current={j === index ? 'page' : undefined}
+                    />
                   </li>
                 ))}
-              </ul>
-            </div>
+              </ol>
+            </nav>
           )
         }
+      </section>
 
+      <!-- Centre: hero render on the electric-blue band (click for fullscreen, uncropped) -->
+      <section aria-label={`${d.title} render`} class="relative min-h-[540px] overflow-hidden rounded-md border border-fg bg-primary-bright lg:col-span-4">
+        {
+          hero && (
+            <button
+              type="button"
+              class="absolute inset-0 block cursor-zoom-in"
+              data-lightbox-item
+              data-group="hero"
+              data-src={heroMeta ? (await getImage({ src: heroMeta, width: Math.min(heroMeta.width, 2400), format: 'webp', quality: 86 })).src : hero.src}
+              data-original={heroMeta?.src ?? hero.src}
+              data-alt={hero.alt || d.title}
+              data-caption={hero.caption ?? d.title}
+              aria-label={`View fullscreen: ${hero.alt || d.title}`}
+            >
+              <ArtImage src={hero.src} alt={hero.alt || d.title} class="h-full w-full" aspect="auto" position="top" widths={[480, 800, 1200, 1600]} sizes="(min-width: 1024px) 33vw, 100vw" priority />
+              <span class="absolute right-gutter-md bottom-gutter-md inline-flex h-9 w-9 items-center justify-center rounded-full border border-line bg-surface-lowest/90 text-fg" aria-hidden="true">
+                <Icon name="expand" size={16} />
+              </span>
+            </button>
+          )
+        }
+      </section>
+
+      <!-- Right: overview & specs -->
+      <section class="flex flex-col justify-center gap-gutter-xl lg:col-span-4 lg:py-gutter-md lg:pl-gutter-md" aria-label="Project overview">
+        {d.summary && <p class="max-w-prose text-body-md text-pretty text-fg-muted">{d.summary}</p>}
+        {
+          specs.length > 0 && (
+            <dl class="flex flex-col gap-gutter-lg border-t border-line pt-gutter-lg">
+              {specs.map((s) => (
+                <div class="flex flex-col gap-gutter-xs">
+                  <dt class="font-mono text-label-md text-fg-muted uppercase">{s.k}</dt>
+                  <dd class="text-title-lg font-semibold text-fg">
+                    {s.href ? (
+                      <a href={s.href} class="link-underline hover:text-primary">
+                        {s.v}
+                      </a>
+                    ) : (
+                      s.v
+                    )}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          )
+        }
         {
           d.artstation && (
-            <a href={d.artstation} class="btn btn-outline w-full" target="_blank" rel="noopener">
+            <a href={d.artstation} class="btn btn-outline self-start" target="_blank" rel="noopener">
               <Icon name="artstation" size={16} /> View on ArtStation
             </a>
           )
         }
-      </aside>
+      </section>
     </div>
+
+    <!-- Write-up, responsibilities & credits -->
+    {
+      (hasBody || d.responsibilities.length > 0 || d.credits.length > 0) && (
+        <div class="container-page mt-section grid gap-gutter-xl border-t border-line pt-section lg:grid-cols-12">
+          <div class="lg:col-span-7">
+            {hasBody && Content && (
+              <div class="prose-art">
+                <Content />
+              </div>
+            )}
+          </div>
+          <aside class="flex flex-col gap-gutter-xl lg:col-span-4 lg:col-start-9" aria-label="Project credits">
+            {d.responsibilities.length > 0 && (
+              <div>
+                <h2 class="label mb-gutter-sm">Responsibilities</h2>
+                <ul class="prose-art !text-body-md">
+                  {d.responsibilities.map((r) => (
+                    <li>{r}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {d.credits.length > 0 && (
+              <div>
+                <h2 class="label mb-gutter-sm">Credits</h2>
+                <ul class="space-y-2 text-body-md">
+                  {d.credits.map((c) => (
+                    <li>
+                      {c.role && <span class="text-fg-subtle">{c.role} — </span>}
+                      {c.url ? (
+                        <a href={c.url} class="text-fg link-underline" target="_blank" rel="noopener">
+                          {c.name}
+                        </a>
+                      ) : (
+                        <span class="text-fg">{c.name}</span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </aside>
+        </div>
+      )
+    }
 
     <!-- Artwork sections -->
     <div class="mt-24 space-y-24 md:mt-32 md:space-y-32">
@@ -236,7 +262,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
       {
         d.videos.length > 0 && (
           <section class="container-page" aria-labelledby="section-video" data-reveal>
-            <header class="mb-8 flex items-baseline gap-4 border-b border-ink-700 pb-4">
+            <header class="mb-8 flex items-baseline gap-4 border-b border-line pb-4">
               <h2 id="section-video" class="display text-display-sm">
                 {d.videos.length > 1 ? 'Videos' : 'Video'}
               </h2>
@@ -253,7 +279,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
       {
         d.model && (
           <section class="container-page" aria-labelledby="section-model" data-reveal>
-            <header class="mb-8 flex items-baseline gap-4 border-b border-ink-700 pb-4">
+            <header class="mb-8 flex items-baseline gap-4 border-b border-line pb-4">
               <h2 id="section-model" class="display text-display-sm">
                 Interactive 3D
               </h2>
@@ -266,7 +292,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
 
     {
       d.copyright && (
-        <p class="container-page mt-20 text-xs text-bone-500">
+        <p class="container-page mt-20 text-xs text-fg-subtle">
           {d.copyright}
         </p>
       )
@@ -275,20 +301,20 @@ const pad = (n: number) => String(n).padStart(2, '0');
     <!-- Prev / next -->
     {
       total > 1 && prev && next && (
-        <nav class="container-page mt-24 grid border-t border-ink-700 md:grid-cols-2" aria-label="More projects">
-          <a href={url(`/portfolio/${prev.slug}`)} class="group flex items-center gap-5 py-10 md:border-r md:border-ink-700 md:pr-10" rel="prev">
-            <Icon name="arrow-left" size={20} class="shrink-0 text-bone-500 transition-transform group-hover:-translate-x-1 group-hover:text-copper-400" />
+        <nav class="container-page mt-24 grid border-t border-line md:grid-cols-2" aria-label="More projects">
+          <a href={url(`/work/${prev.slug}`)} class="group flex items-center gap-5 py-10 md:border-r md:border-line md:pr-10" rel="prev">
+            <Icon name="arrow-left" size={20} class="shrink-0 text-fg-subtle transition-transform group-hover:-translate-x-1 group-hover:text-primary" />
             <span>
               <span class="label block">Previous</span>
-              <span class="display mt-2 block text-2xl group-hover:text-copper-300">{prev.data.title}</span>
+              <span class="display mt-2 block text-2xl group-hover:text-primary-bright">{prev.data.title}</span>
             </span>
           </a>
-          <a href={url(`/portfolio/${next.slug}`)} class="group flex items-center justify-end gap-5 border-t border-ink-700 py-10 text-right md:border-t-0 md:pl-10" rel="next">
+          <a href={url(`/work/${next.slug}`)} class="group flex items-center justify-end gap-5 border-t border-line py-10 text-right md:border-t-0 md:pl-10" rel="next">
             <span>
               <span class="label block">Next</span>
-              <span class="display mt-2 block text-2xl group-hover:text-copper-300">{next.data.title}</span>
+              <span class="display mt-2 block text-2xl group-hover:text-primary-bright">{next.data.title}</span>
             </span>
-            <Icon name="arrow-right" size={20} class="shrink-0 text-bone-500 transition-transform group-hover:translate-x-1 group-hover:text-copper-400" />
+            <Icon name="arrow-right" size={20} class="shrink-0 text-fg-subtle transition-transform group-hover:translate-x-1 group-hover:text-primary" />
           </a>
         </nav>
       )
@@ -296,3 +322,32 @@ const pad = (n: number) => String(n).padStart(2, '0');
   </article>
   <Lightbox />
 </BaseLayout>
+
+<style>
+  .nav-card {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: var(--spacing-gutter-md);
+    padding: var(--spacing-gutter-sm);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-lowest);
+    transition: border-color 120ms var(--ease-standard);
+  }
+  .nav-card:hover {
+    border-color: var(--color-primary);
+  }
+</style>
+
+<script>
+  // ← / → move between projects (ignored while typing or when the image viewer is open).
+  document.addEventListener('keydown', (e) => {
+    if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
+    if ((e.target as HTMLElement).closest('input, textarea, select, [contenteditable], dialog[open], model-viewer')) return;
+    if (document.querySelector('dialog[open]')) return;
+    const rel = e.key === 'ArrowRight' ? 'next' : e.key === 'ArrowLeft' ? 'prev' : '';
+    const link = rel && document.querySelector<HTMLAnchorElement>(`a[rel="${rel}"]`);
+    if (link) location.href = link.href;
+  });
+</script>

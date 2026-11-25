@@ -25,6 +25,11 @@ export default defineConfig({
   site,
   base,
   trailingSlash: 'ignore',
+  // The gallery was renamed from "Portfolio" to "Work"; keep old links working.
+  redirects: {
+    '/portfolio': '/work',
+    '/portfolio/[slug]': '/work/[slug]',
+  },
   // Keep classic whitespace handling (Astro 7 defaults to 'jsx', which strips spaces between inline elements).
   compressHTML: true,
   build: {
@@ -39,7 +44,7 @@ export default defineConfig({
   },
   integrations: [
     sitemap({
-      filter: (page) => !page.includes('/admin'),
+      filter: (page) => !page.includes('/admin') && !page.includes('/portfolio'),
     }),
   ],
   vite: {

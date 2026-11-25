@@ -27,7 +27,7 @@ const { project, aspect = '4 / 5', sizes = '(min-width: 1280px) 30vw, (min-width
   Astro.props;
 const d = project.data;
 const thumb = d.thumbnail ?? d.hero ?? d.renders[0];
-const href = url(`/portfolio/${project.slug}`);
+const href = url(`/work/${project.slug}`);
 const year = formatYear(d.completed);
 
 let fullSrc: string | undefined;
@@ -50,7 +50,7 @@ if (expandable && resolved?.kind === 'local') {
   data-order={String(d.order)}
 >
   <a href={href} class="block focus-visible:outline-offset-4" aria-describedby={`meta-${project.id}`}>
-    <div class="relative overflow-hidden">
+    <div class="relative overflow-hidden rounded-md border border-line">
       <ArtImage
         src={thumb?.src}
         alt={thumb?.alt || d.title}
@@ -60,15 +60,15 @@ if (expandable && resolved?.kind === 'local') {
         priority={priority}
         imgClass="transition-transform duration-700 ease-(--ease-out-quart) group-hover:scale-[1.03]"
       />
-      <div class="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-linear-to-t from-ink-950/70 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" aria-hidden="true"></div>
+      <div class="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-linear-to-t from-scrim/50 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" aria-hidden="true"></div>
       <div class="absolute top-3 left-3 flex flex-wrap gap-2">
         <PlaceholderBadge show={d.placeholder} />
-        {d.status === 'draft' && <span class="placeholder-badge !bg-bone-100">Draft</span>}
+        {d.status === 'draft' && <span class="placeholder-badge !bg-fg !text-surface">Draft</span>}
       </div>
     </div>
     <div class="mt-4 flex items-start justify-between gap-4">
-      <H class="display text-xl leading-snug text-bone-50 transition-colors group-hover:text-copper-300 md:text-2xl">{d.title}</H>
-      <Icon name="arrow-up-right" size={18} class="mt-1 shrink-0 text-bone-500 transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-copper-400" />
+      <H class="text-title-lg font-semibold text-fg transition-colors group-hover:text-primary">{d.title}</H>
+      <Icon name="arrow-up-right" size={18} class="mt-1 shrink-0 text-fg-subtle transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-primary" />
     </div>
     <p id={`meta-${project.id}`} class="label mt-2 flex flex-wrap gap-x-3 gap-y-1">
       {project.categoryInfo && <span>{project.categoryInfo.label}</span>}
@@ -80,7 +80,7 @@ if (expandable && resolved?.kind === 'local') {
     expandable && fullSrc && (
       <button
         type="button"
-        class="absolute top-3 right-3 inline-flex h-10 w-10 items-center justify-center bg-ink-950/70 text-bone-100 opacity-0 backdrop-blur transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+        class="absolute top-3 right-3 inline-flex h-10 w-10 items-center justify-center rounded-full border border-line bg-surface-lowest/90 text-fg opacity-0 backdrop-blur transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
         data-lightbox-item
         data-group="portfolio"
         data-src={fullSrc}

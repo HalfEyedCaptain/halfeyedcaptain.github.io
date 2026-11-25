@@ -31,7 +31,7 @@ export function creativeWorkLd(project: Project, profile: Profile, site: URL | u
     name: d.title,
     headline: d.title,
     description: d.summary,
-    url: absoluteUrl(`/portfolio/${project.slug}`, site),
+    url: absoluteUrl(`/work/${project.slug}`, site),
     ...(imageUrl ? { image: imageUrl } : {}),
     ...(d.completed ? { dateCreated: d.completed } : {}),
     genre: project.categoryInfo?.label,

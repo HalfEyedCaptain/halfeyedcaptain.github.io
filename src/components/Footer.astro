@@ -11,11 +11,11 @@ const year = new Date().getFullYear();
 const cmsUrl = settings.cms.showAdminLink ? url('/admin') : undefined;
 ---
 
-<footer class="relative mt-32 overflow-hidden border-t border-ink-700 bg-ink-950">
-  <Topology class="absolute -right-40 bottom-0 h-[130%] w-[70%] text-copper-500" opacity={0.1} cols={14} rows={9} />
+<footer class="relative mt-32 overflow-hidden border-t border-line bg-surface">
+  <Topology class="absolute -right-40 bottom-0 h-[130%] w-[70%] text-accent" opacity={0.1} cols={14} rows={9} />
   <div class="container-page relative grid gap-12 py-16 md:grid-cols-[1.4fr_1fr_1fr] md:py-20">
     <div>
-      <a href={url('/')} class="display text-3xl text-bone-50">{profile.name}</a>
+      <a href={url('/')} class="display text-3xl text-fg">{profile.name}</a>
       <p class="label mt-3">{profile.title}</p>
       <SocialLinks class="-ml-3 mt-6" />
     </div>
@@ -23,11 +23,11 @@ const cmsUrl = settings.cms.showAdminLink ? url('/admin') : undefined;
     <nav aria-label="Footer">
       <p class="label mb-4">Explore</p>
       <ul class="space-y-2">
-        <li><a href={url('/')} class="text-bone-300 transition-colors hover:text-bone-50">Home</a></li>
+        <li><a href={url('/')} class="text-fg-muted transition-colors hover:text-fg">Home</a></li>
         {
           items.map((i) => (
             <li>
-              <a href={url(i.href)} class="text-bone-300 transition-colors hover:text-bone-50">
+              <a href={url(i.href)} class="text-fg-muted transition-colors hover:text-fg">
                 {i.label}
               </a>
             </li>
@@ -39,22 +39,22 @@ const cmsUrl = settings.cms.showAdminLink ? url('/admin') : undefined;
     <div>
       <p class="label mb-4">Résumé</p>
       <ul class="space-y-2">
-        <li><a href={url('/resume')} class="text-bone-300 transition-colors hover:text-bone-50">View online</a></li>
+        <li><a href={url('/resume')} class="text-fg-muted transition-colors hover:text-fg">View online</a></li>
         <li>
-          <a href={url('/resume#print')} class="text-bone-300 transition-colors hover:text-bone-50">Print / save as PDF</a>
+          <a href={url('/resume#print')} class="text-fg-muted transition-colors hover:text-fg">Print / save as PDF</a>
         </li>
       </ul>
-      {settings.footerNote && <p class="mt-6 text-sm text-bone-500">{settings.footerNote}</p>}
+      {settings.footerNote && <p class="mt-6 text-sm text-fg-subtle">{settings.footerNote}</p>}
     </div>
   </div>
 
-  <div class="container-page relative flex flex-col gap-4 border-t border-ink-700 py-6 text-xs text-bone-500 md:flex-row md:items-center md:justify-between">
+  <div class="container-page relative flex flex-col gap-4 border-t border-line py-6 text-xs text-fg-subtle md:flex-row md:items-center md:justify-between">
     <p>
       © {year} {profile.name}.{settings.rightsNotice && <> {settings.rightsNotice}</>}
     </p>
     {
       cmsUrl && (
-        <a href={cmsUrl} class="inline-flex shrink-0 items-center gap-2 transition-colors hover:text-bone-100" rel="nofollow">
+        <a href={cmsUrl} class="inline-flex shrink-0 items-center gap-2 transition-colors hover:text-fg" rel="nofollow">
           <Icon name="edit" size={14} />
           Edit website
         </a>

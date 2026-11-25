@@ -1,0 +1,66 @@
+---
+/**
+ * Section heading with a round collapse/expand toggle (mockup pattern).
+ * The panel (element with id = `controls`) is open by default; the toggle only
+ * appears when JavaScript runs, so content is never hidden without JS.
+ */
+import Icon from './Icon.astro';
+
+interface Props {
+  id: string;
+  title: string;
+  controls: string;
+  level?: 'h1' | 'h2' | 'h3';
+  class?: string;
+}
+const { id, title, controls, level: H = 'h2', class: className } = Astro.props;
+---
+
+<div class:list={['flex items-center justify-between gap-gutter-md', className]}>
+  <H id={id} class="display text-display-sm text-fg">{title}</H>
+  <button type="button" class="disclosure-btn no-print" aria-expanded="true" aria-controls={controls} data-disclosure hidden>
+    <Icon name="chevron-down" size={18} />
+    <span class="sr-only">Toggle {title}</span>
+  </button>
+</div>
+
+<style>
+  .disclosure-btn {
+    display: inline-flex;
+    width: 2.25rem;
+    height: 2.25rem;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-line);
+    border-radius: 9999px;
+    background: var(--color-surface-lowest);
+    color: var(--color-fg);
+    transition:
+      border-color 120ms var(--ease-standard),
+      color 120ms var(--ease-standard);
+  }
+  .disclosure-btn:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+  .disclosure-btn :global(svg) {
+    transition: transform 220ms var(--ease-enter);
+  }
+  .disclosure-btn[aria-expanded='false'] :global(svg) {
+    transform: rotate(-90deg);
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('[data-disclosure]').forEach((btn) => {
+    const panel = document.getElementById(btn.getAttribute('aria-controls') ?? '');
+    if (!panel) return;
+    btn.hidden = false;
+    btn.addEventListener('click', () => {
+      const open = btn.getAttribute('aria-expanded') !== 'true';
+      btn.setAttribute('aria-expanded', String(open));
+      panel.hidden = !open;
+    });
+  });
+</script>

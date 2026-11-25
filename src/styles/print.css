@@ -55,6 +55,13 @@
     text-decoration: none !important;
   }
 
+  /* The pixel display face is for screen only; print headings in Geist for legibility / ATS. */
+  .resume .display {
+    font-family: var(--font-sans) !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.01em !important;
+  }
+
   /* Header */
   .resume-header {
     padding: 0 0 4mm !important;
@@ -69,7 +76,7 @@
   .resume-title {
     margin-top: 1.5mm !important;
     font-size: 9pt !important;
-    color: #7d4526 !important;
+    color: #0012c9 !important;
   }
   .resume-contact {
     margin-top: 3mm !important;
@@ -104,7 +111,7 @@
   .resume-section > h2 {
     font-size: 7.4pt !important;
     letter-spacing: 0.14em !important;
-    color: #7d4526 !important;
+    color: #0012c9 !important;
     padding-top: 0.6mm !important;
     break-after: avoid;
   }
@@ -137,7 +144,7 @@
   .resume ul.resume-bullets li::before {
     content: '•' !important;
     background: none !important;
-    color: #7d4526 !important;
+    color: #0012c9 !important;
     width: auto !important;
     height: auto !important;
     top: 0 !important;

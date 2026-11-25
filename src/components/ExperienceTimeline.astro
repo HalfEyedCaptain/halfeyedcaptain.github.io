@@ -37,29 +37,29 @@ const rows = await Promise.all(
 );
 ---
 
-<ol class="relative border-l border-ink-700">
+<ol class="relative border-l border-line">
   {
     rows.map(({ job, range, duration, games }) => (
       <li class="relative pb-12 pl-8 last:pb-0 md:pl-12" data-reveal>
         <span
           class:list={[
             'absolute top-2 -left-[5px] h-[9px] w-[9px] rotate-45 border',
-            job.isCurrent ? 'border-copper-400 bg-copper-400' : 'border-ink-600 bg-ink-950',
+            job.isCurrent ? 'border-primary bg-primary' : 'border-line-strong bg-surface',
           ]}
           aria-hidden="true"
         />
         <div class="grid gap-2 md:grid-cols-[12rem_1fr] md:gap-10">
           <div>
-            <p class="label text-bone-300">{range}</p>
+            <p class="label text-fg-muted">{range}</p>
             {duration && <p class="label mt-1">{duration}</p>}
           </div>
           <div>
             <div class="flex flex-wrap items-center gap-3">
               <h3 class="display text-2xl leading-tight">{job.data.role}</h3>
-              {job.isCurrent && <span class="label text-copper-400">Current</span>}
+              {job.isCurrent && <span class="label text-primary">Current</span>}
               <PlaceholderBadge show={job.data.placeholder} />
             </div>
-            <p class="mt-1 text-bone-300">
+            <p class="mt-1 text-fg-muted">
               {job.data.companyUrl ? (
                 <a href={job.data.companyUrl} class="link-underline" target="_blank" rel="noopener">
                   {job.data.company}
@@ -67,11 +67,11 @@ const rows = await Promise.all(
               ) : (
                 job.data.company
               )}
-              {job.data.location && <span class="text-bone-500"> · {job.data.location}</span>}
-              {TYPE[job.data.employmentType] && <span class="text-bone-500"> · {TYPE[job.data.employmentType]}</span>}
+              {job.data.location && <span class="text-fg-subtle"> · {job.data.location}</span>}
+              {TYPE[job.data.employmentType] && <span class="text-fg-subtle"> · {TYPE[job.data.employmentType]}</span>}
             </p>
 
-            {job.data.summary && <p class="mt-4 max-w-2xl text-bone-300">{job.data.summary}</p>}
+            {job.data.summary && <p class="mt-4 max-w-2xl text-fg-muted">{job.data.summary}</p>}
 
             {variant === 'full' && (
               <>
@@ -109,7 +109,7 @@ const rows = await Promise.all(
               <p class="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
                 <span class="label">Shipped</span>
                 {games.map((g) => (
-                  <a href={url(`/games#${g.id}`)} class="text-bone-100 link-underline">
+                  <a href={url(`/games#${g.id}`)} class="text-fg link-underline">
                     {g.title}
                   </a>
                 ))}

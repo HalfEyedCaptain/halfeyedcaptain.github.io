@@ -7,6 +7,7 @@
 import '@/styles/print.css';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Icon from '@/components/Icon.astro';
+import DisclosureHeading from '@/components/DisclosureHeading.astro';
 import PlaceholderBadge from '@/components/PlaceholderBadge.astro';
 import ResumeSection from '@/components/resume/ResumeSection.astro';
 import {
@@ -47,6 +48,25 @@ const leadershipGroups = skills.groups.filter((g) => g.kind === 'leadership');
 const portfolioUrl = absoluteUrl('/', Astro.site);
 const updated = formatMonthYear(new Date().toISOString().slice(0, 10));
 
+// ---- Dossier (screen) view — design: resume.html --------------------------
+const isPlaceholderText = (s: string) => /^\[placeholder\]/i.test(s.trim());
+const monthOf = (d: string | undefined) => (d ? new Date(d).toLocaleString('en', { month: 'short', timeZone: 'UTC' }) : '');
+const yearSpan = (start: string | undefined, end: string | undefined, current: boolean) => {
+  const a = formatYear(start);
+  const b = current ? 'Present' : formatYear(end);
+  return a && b && a !== b ? `${a} — ${b}` : a || b || '';
+};
+const expertiseGroups = skills.groups.filter((g) => g.kind === 'technical' || g.kind === 'artistic');
+const expertiseText = [...new Set(expertiseGroups.flatMap((g) => g.items))].join(', ');
+const softwareGroups = skills.groups.filter((g) => g.kind === 'software');
+const tools = [...new Set(softwareGroups.flatMap((g) => g.items))].filter((s) => !isPlaceholderText(s));
+const abbr = (name: string) => {
+  const words = name.replace(/[^\p{L}\p{N} ]/gu, '').split(/\s+/).filter(Boolean);
+  return (words.length > 1 ? words.slice(0, 2).map((w) => w[0]).join('') : name.slice(0, 2)).toUpperCase();
+};
+const softSkills = leadershipGroups.flatMap((g) => g.items);
+const tag = (s: string) => (s.split(/\s+/).length <= 3 && !isPlaceholderText(s) ? `#${s.split(/\s+/).map((w) => w[0]!.toUpperCase() + w.slice(1)).join('')}` : s);
+
 type ContactItem = { icon: 'mail' | 'other' | 'pin' | 'globe' | 'artstation' | 'linkedin'; text: string; href: string | undefined };
 const tidy = (u: string) => u.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
 const contact: ContactItem[] = [];
@@ -65,21 +85,21 @@ for (const s of profile.socials) {
   type="profile"
   jsonLd={personLd(profile, Astro.site, { jobs })}
 >
-  <div class="resume container-page max-w-6xl pt-12 md:pt-20">
-    <header class="resume-header grid gap-8 pb-12 md:grid-cols-[1fr_auto] md:items-end">
+  <div class="resume container-page reference-resume">
+    <header class="resume-header print-only grid gap-8 pb-12 md:grid-cols-[1fr_auto] md:items-end">
       <div>
         <p class="label no-print mb-4 flex items-center gap-3">
-          <span class="inline-block h-px w-8 bg-copper-500" aria-hidden="true"></span>Résumé
+          <span class="inline-block h-px w-8 bg-accent" aria-hidden="true"></span>Résumé
         </p>
         <h1 class="resume-name display text-display-lg">{profile.name}</h1>
-        <p class="resume-title mt-4 font-mono text-sm tracking-[0.16em] text-copper-400 uppercase">{profile.title}</p>
-        <ul class="resume-contact mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm text-bone-300">
+        <p class="resume-title mt-4 font-mono text-sm tracking-[0.16em] text-primary uppercase">{profile.title}</p>
+        <ul class="resume-contact mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm text-fg-muted">
           {
             contact.map((c) => (
               <li class="flex items-center gap-2">
-                <Icon name={c.icon} size={14} class="text-bone-500" />
+                <Icon name={c.icon} size={14} class="text-fg-subtle" />
                 {c.href ? (
-                  <a href={c.href} class="hover:text-bone-50">
+                  <a href={c.href} class="hover:text-fg">
                     {c.text}
                   </a>
                 ) : (
@@ -104,10 +124,151 @@ for (const s of profile.socials) {
       </div>
     </header>
 
+    <!-- Dossier: Experience | Expertise · Hardskill · Softskill | Education (screen only) -->
+    <div class="no-print grid gap-gutter-xl lg:grid-cols-3 lg:gap-0 lg:divide-x lg:divide-line">
+      <section aria-labelledby="d-experience" class="flex min-w-0 flex-col gap-gutter-lg lg:pr-gutter-xl">
+        <DisclosureHeading id="d-experience" title="Experience" controls="d-experience-panel" />
+        <div id="d-experience-panel" class="flex flex-col gap-gutter-md">
+          {
+            jobs.length ? (
+              jobs.map((job) => (
+                <a href={`#job-${job.id}`} class="group flex flex-col gap-gutter-md rounded-md border border-fg bg-surface-lowest p-gutter-lg transition-colors duration-120 hover:border-primary">
+                  <span class="flex items-center justify-between gap-gutter-sm">
+                    <span class="rounded-full bg-primary-bright px-gutter-md py-gutter-xs font-mono text-label-md text-on-primary uppercase tabular-nums">
+                      {yearSpan(job.data.start, job.data.end, job.isCurrent)}
+                    </span>
+                    <span class="flex items-center gap-gutter-sm">
+                      <PlaceholderBadge show={job.data.placeholder} />
+                      <Icon name={job.isCurrent ? 'refresh' : 'check-circle'} size={20} class="text-fg-muted" label={job.isCurrent ? 'Current role' : 'Completed role'} />
+                    </span>
+                  </span>
+                  <span class="flex flex-col gap-gutter-xs">
+                    <span class="font-mono text-label-md text-fg-muted uppercase">{job.data.company}</span>
+                    <span class="text-title-md font-semibold text-balance text-fg group-hover:text-primary">{job.data.role}</span>
+                  </span>
+                  <span class="flex flex-col gap-gutter-xs pt-gutter-sm" aria-hidden="true">
+                    <span class="flex items-center">
+                      <span class="h-1.5 w-1.5 rounded-full bg-fg" />
+                      <span class="h-px flex-1 bg-line" />
+                      <span class:list={['h-1.5 w-1.5 rounded-full', job.isCurrent ? 'bg-primary-bright' : 'bg-fg']} />
+                    </span>
+                    <span class="flex justify-between font-mono text-label-md text-fg-muted uppercase">
+                      <span>{monthOf(job.data.start)}</span>
+                      <span>{job.isCurrent ? 'Present' : monthOf(job.data.end)}</span>
+                    </span>
+                  </span>
+                </a>
+              ))
+            ) : (
+              <p class="text-body-md text-fg-subtle">Experience will be listed here soon.</p>
+            )
+          }
+        </div>
+      </section>
+
+      <section aria-labelledby="d-expertise" class="flex min-w-0 flex-col gap-gutter-xl lg:px-gutter-xl">
+        {
+          expertiseText && (
+            <div class="flex flex-col gap-gutter-md">
+              <DisclosureHeading id="d-expertise" title="Expertise" controls="d-expertise-panel" />
+              <div id="d-expertise-panel" class="flex flex-col gap-gutter-sm">
+                <p class="text-body-lg text-pretty text-fg-muted">{expertiseText}</p>
+                <PlaceholderBadge show={expertiseGroups.some((g) => g.placeholder)} class="self-start" />
+              </div>
+            </div>
+          )
+        }
+
+        {
+          tools.length > 0 && (
+            <div class="flex flex-col gap-gutter-md">
+              <DisclosureHeading id="d-hardskill" title="Hardskill" controls="d-hardskill-panel" />
+              <div id="d-hardskill-panel" class="flex flex-col gap-gutter-md rounded-lg border border-fg bg-inverse p-gutter-md text-on-inverse">
+                <ul class="grid grid-cols-6 gap-gutter-sm">
+                  {tools.map((t, i) => (
+                    <li
+                      class:list={[
+                        'flex aspect-square items-center justify-center rounded-full border font-mono text-label-md uppercase',
+                        i % 2 === 0 ? 'border-on-primary/30 bg-primary-bright text-on-primary' : 'border-line bg-surface-lowest text-fg',
+                      ]}
+                      title={t}
+                    >
+                      <span aria-hidden="true">{abbr(t)}</span>
+                      <span class="sr-only">{t}</span>
+                    </li>
+                  ))}
+                </ul>
+                <p class="font-mono text-label-md text-on-inverse/80" aria-hidden="true">{tools.join(' · ')}</p>
+                <PlaceholderBadge show={softwareGroups.some((g) => g.placeholder)} text="More software to be added" class="self-start" />
+              </div>
+            </div>
+          )
+        }
+
+        {
+          softSkills.length > 0 && (
+            <div class="flex flex-col gap-gutter-md">
+              <DisclosureHeading id="d-softskill" title="Softskill" controls="d-softskill-panel" />
+              <div id="d-softskill-panel" class="flex flex-col gap-gutter-sm">
+                <ul class="flex flex-wrap gap-gutter-sm">
+                  {softSkills.map((s, i) => (
+                    <li
+                      class:list={[
+                        'rounded-full border px-gutter-md py-gutter-xs font-mono text-label-md',
+                        i % 4 === 0 ? 'border-primary-bright bg-primary-bright text-on-primary' : 'border-fg bg-surface-lowest text-fg',
+                      ]}
+                    >
+                      {tag(s)}
+                    </li>
+                  ))}
+                </ul>
+                <PlaceholderBadge show={leadershipGroups.some((g) => g.placeholder)} class="self-start" />
+              </div>
+            </div>
+          )
+        }
+      </section>
+
+      <section aria-labelledby="d-education" class="flex min-w-0 flex-col gap-gutter-lg lg:pl-gutter-xl">
+        <DisclosureHeading id="d-education" title="Education" controls="d-education-panel" />
+        <div id="d-education-panel" class="flex flex-col gap-gutter-lg">
+          {
+            education.length ? (
+              education.map((e, i) => (
+                <>
+                  {i > 0 && <hr class="border-line" />}
+                  <article class="flex flex-col gap-gutter-md rounded-md border border-fg bg-inverse p-gutter-lg text-on-inverse">
+                    <header class="flex items-center justify-between gap-gutter-sm">
+                      <span class="rounded-full bg-surface-lowest px-gutter-md py-gutter-xs font-mono text-label-md text-fg uppercase tabular-nums">
+                        {formatRange(e.data.start, e.data.end, false, { yearOnly: true })}
+                      </span>
+                      <span class="flex items-center gap-gutter-sm">
+                        <PlaceholderBadge show={e.data.placeholder} />
+                        <Icon name="check-circle" size={20} class="opacity-80" />
+                      </span>
+                    </header>
+                    <div class="flex flex-col gap-gutter-xs">
+                      <span class="font-mono text-label-md uppercase opacity-75">{e.data.institution}</span>
+                      <h3 class="text-title-md font-semibold text-balance text-on-primary">{e.data.qualification}</h3>
+                      {e.data.field && <p class="text-body-md opacity-80">{e.data.field}</p>}
+                    </div>
+                  </article>
+                </>
+              ))
+            ) : (
+              <p class="text-body-md text-fg-subtle">Education will be listed here soon.</p>
+            )
+          }
+        </div>
+      </section>
+    </div>
+
+    <h2 class="no-print display mt-section-lg border-t border-line pt-gutter-xl text-display-sm">Full résumé</h2>
+
     {
       (profile.summary || stats.months > 0) && (
         <ResumeSection title="Profile" id="r-profile">
-          {profile.summary && <p class="resume-summary max-w-3xl text-lg leading-relaxed text-bone-100">{profile.summary}</p>}
+          {profile.summary && <p class="resume-summary max-w-3xl text-lg leading-relaxed text-fg">{profile.summary}</p>}
           {stats.months > 0 && (
             <p class="resume-meta label mt-4">
               {formatDuration(stats.months)} professional experience
@@ -123,25 +284,25 @@ for (const s of profile.socials) {
         <ResumeSection title="Experience" id="r-experience">
           <div class="space-y-10">
             {jobs.map((job) => (
-              <div class="resume-entry">
+              <div class="resume-entry scroll-mt-28" id={`job-${job.id}`}>
                 <div class="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
                   <h3 class="display flex flex-wrap items-center gap-3 text-2xl">
                     {job.data.role}
                     <PlaceholderBadge show={job.data.placeholder} />
                   </h3>
-                  <p class="resume-meta label text-bone-300">
+                  <p class="resume-meta label text-fg-muted">
                     {formatRange(job.data.start, job.data.end, job.isCurrent)}
-                    <span class="text-bone-500"> · {formatDuration(periodMonths({ start: job.data.start, end: job.data.end, current: job.isCurrent }))}</span>
+                    <span class="text-fg-subtle"> · {formatDuration(periodMonths({ start: job.data.start, end: job.data.end, current: job.isCurrent }))}</span>
                   </p>
                 </div>
-                <p class="mt-1 text-bone-300">
+                <p class="mt-1 text-fg-muted">
                   {job.data.company}
-                  {job.data.location && <span class="text-bone-500"> · {job.data.location}</span>}
+                  {job.data.location && <span class="text-fg-subtle"> · {job.data.location}</span>}
                   {job.data.employmentType !== 'full-time' && job.data.employmentType !== 'other' && (
-                    <span class="text-bone-500 capitalize"> · {job.data.employmentType.replace('-', ' ')}</span>
+                    <span class="text-fg-subtle capitalize"> · {job.data.employmentType.replace('-', ' ')}</span>
                   )}
                 </p>
-                {job.data.summary && <p class="mt-3 max-w-3xl text-bone-300">{job.data.summary}</p>}
+                {job.data.summary && <p class="mt-3 max-w-3xl text-fg-muted">{job.data.summary}</p>}
                 {[...job.data.responsibilities, ...job.data.achievements, ...job.data.leadership].length > 0 && (
                   <ul class="resume-bullets prose-art mt-3 !max-w-3xl space-y-1 !text-base">
                     {job.data.responsibilities.map((r) => (
@@ -156,7 +317,7 @@ for (const s of profile.socials) {
                   </ul>
                 )}
                 {job.data.games.some((id) => gameTitles.has(id)) && (
-                  <p class="resume-meta mt-3 text-sm text-bone-500">
+                  <p class="resume-meta mt-3 text-sm text-fg-subtle">
                     <span class="label mr-2">Shipped</span>
                     {job.data.games
                       .map((id) => gameTitles.get(id))
@@ -174,15 +335,15 @@ for (const s of profile.socials) {
     {
       games.length > 0 && (
         <ResumeSection title="Shipped titles" id="r-games">
-          <ul class="divide-y divide-ink-700">
+          <ul class="divide-y divide-line">
             {games.map((g) => (
               <li class="resume-entry grid gap-1 py-3 first:pt-0 sm:grid-cols-[1fr_auto] sm:gap-6">
                 <div>
-                  <span class="text-bone-50">{g.data.title}</span>
-                  {g.data.role && <span class="text-bone-300"> — {g.data.role}</span>}
+                  <span class="text-fg">{g.data.title}</span>
+                  {g.data.role && <span class="text-fg-muted"> — {g.data.role}</span>}
                   <PlaceholderBadge show={g.data.placeholder} class="ml-2" />
                   {(g.data.studio || g.data.platforms.length > 0) && (
-                    <p class="resume-meta text-sm text-bone-500">
+                    <p class="resume-meta text-sm text-fg-subtle">
                       {[g.data.studio, g.data.platforms.join(', ')].filter(Boolean).join(' · ')}
                     </p>
                   )}
@@ -197,14 +358,14 @@ for (const s of profile.socials) {
 
     {
       skillGroups.length > 0 && (
-        <ResumeSection title="Skills" id="r-skills">
+        <ResumeSection title="Skills" id="r-skills" class="print-only">
           <div class="space-y-5">
             {skillGroups.map((g) => (
               <div class="resume-entry grid gap-2 sm:grid-cols-[11rem_1fr] sm:gap-6">
-                <h3 class="resume-meta label pt-1 !text-[0.6875rem] text-bone-300">{g.title}</h3>
+                <h3 class="resume-meta label pt-1 !text-[0.6875rem] text-fg-muted">{g.title}</h3>
                 <ul class="resume-tags flex flex-wrap gap-2">
                   {g.items.map((s) => (
-                    <li class="border border-ink-700 px-2.5 py-1 text-sm text-bone-100">{s}</li>
+                    <li class="border border-line px-2.5 py-1 text-sm text-fg">{s}</li>
                   ))}
                 </ul>
               </div>
@@ -216,7 +377,7 @@ for (const s of profile.socials) {
 
     {
       leadershipGroups.length > 0 && (
-        <ResumeSection title="Leadership" id="r-leadership">
+        <ResumeSection title="Leadership" id="r-leadership" class="print-only">
           <ul class="resume-bullets prose-art !max-w-3xl space-y-1 !text-base">
             {leadershipGroups.flatMap((g) => g.items).map((s) => (
               <li>{s}</li>
@@ -228,7 +389,7 @@ for (const s of profile.socials) {
 
     {
       education.length > 0 && (
-        <ResumeSection title="Education" id="r-education">
+        <ResumeSection title="Education" id="r-education" class="print-only">
           <div class="space-y-6">
             {education.map((e) => (
               <div class="resume-entry">
@@ -239,12 +400,12 @@ for (const s of profile.socials) {
                   </h3>
                   <p class="resume-meta label">{formatRange(e.data.start, e.data.end, false, { yearOnly: true })}</p>
                 </div>
-                <p class="mt-1 text-bone-300">
+                <p class="mt-1 text-fg-muted">
                   {e.data.institution}
-                  {e.data.field && <span class="text-bone-500"> · {e.data.field}</span>}
-                  {e.data.location && <span class="text-bone-500"> · {e.data.location}</span>}
+                  {e.data.field && <span class="text-fg-subtle"> · {e.data.field}</span>}
+                  {e.data.location && <span class="text-fg-subtle"> · {e.data.location}</span>}
                 </p>
-                {e.data.description && <p class="mt-2 text-sm text-bone-500">{e.data.description}</p>}
+                {e.data.description && <p class="mt-2 text-sm text-fg-subtle">{e.data.description}</p>}
               </div>
             ))}
           </div>
@@ -266,14 +427,14 @@ for (const s of profile.socials) {
                 <li class="resume-entry flex flex-wrap items-baseline justify-between gap-x-6">
                   <span>
                     {r.data.url ? (
-                      <a href={r.data.url} class="text-bone-50 link-underline" target="_blank" rel="noopener">
+                      <a href={r.data.url} class="text-fg link-underline" target="_blank" rel="noopener">
                         {r.data.title}
                       </a>
                     ) : (
-                      <span class="text-bone-50">{r.data.title}</span>
+                      <span class="text-fg">{r.data.title}</span>
                     )}
-                    {r.data.issuer && <span class="text-bone-300"> — {r.data.issuer}</span>}
-                    {group.id === 'r-recognition' && <span class="resume-meta text-bone-500"> ({RECOGNITION_LABELS[r.data.type]})</span>}
+                    {r.data.issuer && <span class="text-fg-muted"> — {r.data.issuer}</span>}
+                    {group.id === 'r-recognition' && <span class="resume-meta text-fg-subtle"> ({RECOGNITION_LABELS[r.data.type]})</span>}
                     <PlaceholderBadge show={r.data.placeholder} class="ml-2" />
                   </span>
                   <span class="resume-meta label">{formatYear(r.data.date)}</span>
@@ -289,9 +450,9 @@ for (const s of profile.socials) {
         <ResumeSection title="Languages" id="r-languages">
           <ul class="resume-tags flex flex-wrap gap-x-8 gap-y-2">
             {profile.languages.map((l) => (
-              <li class="text-bone-100">
+              <li class="text-fg">
                 {l.name}
-                {l.proficiency && <span class="text-bone-500"> — {l.proficiency}</span>}
+                {l.proficiency && <span class="text-fg-subtle"> — {l.proficiency}</span>}
               </li>
             ))}
           </ul>

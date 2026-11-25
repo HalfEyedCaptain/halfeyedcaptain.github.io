@@ -63,7 +63,7 @@ New portfolio projects start as **Draft**, so nothing goes live until you switch
 1. Click **Portfolio projects → Add an entry**.
 2. Fill in:
    - **Project title**, e.g. *Forest Guardian*
-   - **URL slug** (optional), e.g. `forest-guardian`, which becomes `…/portfolio/forest-guardian/`
+   - **URL slug** (optional), e.g. `forest-guardian`, which becomes `…/work/forest-guardian/`
    - **Short description**: one or two sentences shown on cards
    - **Category**: pick from your list (see [Categories](#6-categories-featured-projects-and-order))
    - **Personal or professional**
@@ -104,7 +104,7 @@ Each image field has three parts:
 
 ## 6. Categories, featured projects and order
 
-- **Add a category:** **Portfolio categories → Add an entry**, give it a name (e.g. *Fantasy Characters*) and a display order, then **Save**. It appears as a filter on the portfolio page once a published project uses it.
+- **Add a category:** **Portfolio categories → Add an entry**, give it a name (e.g. *Fantasy Characters*) and a display order, then **Save**. It appears as a filter on the Work page once a published project uses it.
 - **Feature a project:** tick **Featured project**. Featured projects appear on the homepage and under the "Featured" filter.
 - **Choose exactly which projects appear on the homepage:** **Page: Home → Selected work → Projects to show**. Leave it empty to use your featured projects.
 - **Order:** set **Display order** with lower numbers first. Use gaps (10, 20, 30…) so you can slot new work in later.

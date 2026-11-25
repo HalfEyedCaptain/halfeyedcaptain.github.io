@@ -25,10 +25,10 @@ if (p?.kind === 'local') posterUrl = (await getImage({ src: p.meta, width: 1600,
 else if (p?.kind === 'remote') posterUrl = p.src;
 ---
 
-<div class="model-shell relative aspect-[4/3] overflow-hidden bg-ink-850 md:aspect-video" data-model-shell data-src={modelUrl} data-alt={alt} data-poster={posterUrl ?? ''} data-rotate={String(autoRotate)}>
+<div class="model-shell relative aspect-[4/3] overflow-hidden bg-surface-container md:aspect-video" data-model-shell data-src={modelUrl} data-alt={alt} data-poster={posterUrl ?? ''} data-rotate={String(autoRotate)}>
   {posterUrl && <img src={posterUrl} alt="" class="absolute inset-0 h-full w-full object-contain opacity-60" loading="lazy" />}
   <div class="absolute inset-0 flex flex-col items-center justify-center gap-4 p-6 text-center">
-    <Icon name="cube" size={40} class="text-copper-400" />
+    <Icon name="cube" size={40} class="text-primary" />
     <button type="button" class="btn btn-outline" data-model-load>Load interactive 3D model</button>
     <p class="label">Drag to orbit · Scroll to zoom</p>
   </div>

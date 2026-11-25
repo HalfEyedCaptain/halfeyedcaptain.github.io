@@ -1,53 +1,102 @@
 /* =========================================================================
    Parth Dhulia — Design system
+   Light, gallery-white surfaces · electric-blue accent · pixel display type.
    See DESIGN_SYSTEM.md for documentation of every token below.
    ========================================================================= */
 
 @import 'tailwindcss';
-@import '@fontsource-variable/fraunces';
-@import '@fontsource-variable/inter';
-@import '@fontsource-variable/jetbrains-mono';
+@import '@fontsource/silkscreen/400.css';
+@import '@fontsource/silkscreen/700.css';
+@import '@fontsource-variable/geist';
+@import '@fontsource/dm-mono/400.css';
+@import '@fontsource/dm-mono/500.css';
 
 @theme {
-  /* --- Colour: graphite / near-black surfaces --------------------------- */
-  --color-ink-950: #0b0a09; /* page background */
-  --color-ink-900: #121110; /* raised surface */
-  --color-ink-850: #191715; /* cards, image wells */
-  --color-ink-800: #211f1c; /* hover surface */
-  --color-ink-700: #2e2b27; /* hairlines on dark */
-  --color-ink-600: #45403a; /* strong borders */
+  /* --- Colour: surfaces (light, neutral) -------------------------------- */
+  --color-surface: #faf9f9; /* page background */
+  --color-surface-lowest: #ffffff; /* elevated cards, pill nav */
+  --color-surface-low: #f4f3f3; /* raised bands */
+  --color-surface-container: #eeeeee; /* image wells */
+  --color-surface-high: #e8e8e8; /* hover surface */
 
-  /* --- Colour: warm off-white type -------------------------------------- */
-  --color-bone-50: #f6f1e8; /* headings */
-  --color-bone-100: #ece6dc; /* body text */
-  --color-bone-300: #c9c0b2; /* secondary text */
-  --color-bone-500: #9c9387; /* tertiary / meta (≥ 6.5:1 on ink-950) */
+  /* --- Colour: lines ---------------------------------------------------- */
+  --color-line: #c5c5da; /* hairlines (outline-variant) */
+  --color-line-strong: #757589; /* strong borders (outline) */
 
-  /* --- Colour: copper / clay accent ------------------------------------- */
-  --color-copper-300: #e2a77c;
-  --color-copper-400: #d48c5d; /* links & accents on dark (≥ 6.9:1) */
-  --color-copper-500: #c27a4a; /* decorative accent, focus rings */
-  --color-copper-700: #7d4526; /* print accent on white */
+  /* --- Colour: type ----------------------------------------------------- */
+  --color-fg: #1a1c1c; /* headings & body (on-surface) */
+  --color-fg-muted: #444557; /* secondary text (on-surface-variant) */
+  --color-fg-subtle: #5d5f5e; /* meta text (secondary, ≥ 6:1 on surface) */
+
+  /* --- Colour: accent --------------------------------------------------- */
+  --color-primary: #0012c9; /* links, active states (≥ 11:1 on surface) */
+  --color-primary-bright: #1528ff; /* primary-container: CTAs, hover */
+  --color-accent: #1528ff; /* decorative accent, focus rings */
+  --color-on-primary: #ffffff;
+
+  /* --- Colour: inverse & image overlays --------------------------------- */
+  --color-inverse: #2f3131; /* inverse-surface: dark cards, captions */
+  --color-on-inverse: #f1f1f0;
+  --color-scrim: #1a1c1c; /* gradient over artwork */
+  --color-on-scrim: #ffffff;
+
+  --color-placeholder: #e5c07b;
 
   /* --- Typography ------------------------------------------------------- */
-  --font-display: 'Fraunces Variable', 'Iowan Old Style', 'Georgia', serif;
-  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  --font-display: 'Silkscreen', ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  --font-sans: 'Geist Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'DM Mono', ui-monospace, 'SFMono-Regular', Consolas, monospace;
 
-  /* Fluid display sizes (min @ 360px → max @ 1440px) */
-  --text-display-xl: clamp(3rem, 1.6rem + 6.2vw, 7.5rem);
-  --text-display-xl--line-height: 0.92;
-  --text-display-lg: clamp(2.4rem, 1.5rem + 3.8vw, 5rem);
-  --text-display-lg--line-height: 0.98;
-  --text-display-md: clamp(1.9rem, 1.4rem + 2.2vw, 3.25rem);
-  --text-display-md--line-height: 1.05;
-  --text-display-sm: clamp(1.4rem, 1.2rem + 0.9vw, 2rem);
-  --text-display-sm--line-height: 1.15;
+  /* Display sizes — fluid between the mockup's mobile and desktop values. */
+  --text-display-xl: clamp(2.25rem, 1.6rem + 2.8vw, 4rem);
+  --text-display-xl--line-height: 1.05;
+  --text-display-lg: clamp(2rem, 1.45rem + 2.2vw, 3.5rem); /* 32 → 56 */
+  --text-display-lg--line-height: 1.07;
+  --text-display-md: clamp(1.75rem, 1.45rem + 1.2vw, 2.5rem); /* 28 → 40 */
+  --text-display-md--line-height: 1.1;
+  --text-display-sm: clamp(1.5rem, 1.3rem + 0.8vw, 2rem); /* headline-lg 32 */
+  --text-display-sm--line-height: 1.19;
+
+  --text-headline-md: 1.5rem;
+  --text-headline-md--line-height: 1.25;
+  --text-title-lg: 1.25rem;
+  --text-title-lg--line-height: 1.3;
+  --text-title-md: 1rem;
+  --text-title-md--line-height: 1.375;
+  --text-body-lg: 1rem;
+  --text-body-lg--line-height: 1.5;
+  --text-body-md: 0.875rem;
+  --text-body-md--line-height: 1.5;
+  --text-label-lg: 0.875rem;
+  --text-label-lg--line-height: 1.43;
+  --text-label-lg--letter-spacing: 0.025em;
+  --text-label-md: 0.75rem;
+  --text-label-md--line-height: 1.33;
+  --text-label-md--letter-spacing: 0.05em;
+
+  /* --- Shape ------------------------------------------------------------ */
+  --radius-sm: 0.25rem;
+  --radius: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+
+  /* --- Spacing (gutters) ------------------------------------------------ */
+  --spacing-gutter-xs: 0.25rem;
+  --spacing-gutter-sm: 0.5rem;
+  --spacing-gutter-md: 1rem;
+  --spacing-gutter-lg: 1.5rem;
+  --spacing-gutter-xl: 2rem;
+  --spacing-section: 3rem;
+  --spacing-section-lg: 4rem;
 
   /* --- Layout ----------------------------------------------------------- */
-  --container-page: 92rem;
+  --container-page: 90rem;
   --container-prose: 42rem;
 
+  /* --- Motion ----------------------------------------------------------- */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1); /* state change, 120ms */
+  --ease-enter: cubic-bezier(0.16, 1, 0.3, 1); /* surface enter, 220ms */
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1); /* surface exit, 150ms */
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
 }
 
@@ -57,42 +106,40 @@
 
 @layer base {
   :root {
-    color-scheme: dark;
-    --gutter: clamp(1rem, 0.5rem + 2.4vw, 3rem);
+    color-scheme: light;
+    --gutter: clamp(1rem, 0.5rem + 2.2vw, 2.5rem);
     --header-h: 4.5rem;
   }
 
   html {
-    background: var(--color-ink-950);
-    color: var(--color-bone-100);
+    background: var(--color-surface);
+    color: var(--color-fg);
     font-family: var(--font-sans);
-    font-feature-settings: 'ss01', 'cv11';
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
     scroll-padding-top: calc(var(--header-h) + 1rem);
   }
 
   body {
     min-height: 100dvh;
-    background: var(--color-ink-950);
+    background: var(--color-surface);
     font-size: 1rem;
-    line-height: 1.65;
+    line-height: 1.6;
   }
 
   ::selection {
-    background: var(--color-copper-500);
-    color: var(--color-ink-950);
+    background: var(--color-primary-bright);
+    color: var(--color-on-primary);
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-copper-400);
+    outline: 2px solid var(--color-primary);
     outline-offset: 3px;
     border-radius: 2px;
   }
 
   h1, h2, h3, h4 {
-    color: var(--color-bone-50);
+    color: var(--color-fg);
     font-weight: 400;
     text-wrap: balance;
   }
@@ -107,7 +154,7 @@
   }
 
   hr {
-    border-color: var(--color-ink-700);
+    border-color: var(--color-line);
   }
 }
 
@@ -116,10 +163,13 @@
   @view-transition {
     navigation: auto;
   }
-  ::view-transition-old(root),
+  ::view-transition-old(root) {
+    animation-duration: 150ms;
+    animation-timing-function: var(--ease-exit);
+  }
   ::view-transition-new(root) {
-    animation-duration: 260ms;
-    animation-timing-function: var(--ease-out-quart);
+    animation-duration: 220ms;
+    animation-timing-function: var(--ease-enter);
   }
   html {
     scroll-behavior: smooth;
@@ -148,26 +198,26 @@
   padding-inline: var(--gutter);
 }
 
-/* Small technical label — evokes sculpting-software UI and art-book captions. */
+/* Small technical label (label-md) — monospaced, uppercase. */
 @utility label {
   font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  line-height: 1.4;
+  font-size: var(--text-label-md);
+  line-height: var(--text-label-md--line-height);
   font-weight: 500;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--color-bone-500);
+  color: var(--color-fg-subtle);
 }
 
+/* Pixel display face — Silkscreen. */
 @utility display {
   font-family: var(--font-display);
-  font-weight: 350;
-  letter-spacing: -0.02em;
-  font-optical-sizing: auto;
+  font-weight: 400;
+  letter-spacing: 0;
 }
 
 @utility hairline {
-  border-color: var(--color-ink-700);
+  border-color: var(--color-line);
 }
 
 @utility link-underline {
@@ -175,63 +225,87 @@
   text-decoration-thickness: 1px;
   text-underline-offset: 0.25em;
   text-decoration-color: color-mix(in oklab, currentColor 35%, transparent);
-  transition: text-decoration-color 160ms ease;
+  transition: text-decoration-color 120ms var(--ease-standard);
   &:hover {
     text-decoration-color: currentColor;
   }
 }
 
 @layer components {
-  /* Buttons — rectangular, editorial. */
+  /* Buttons — pills. */
   .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.6rem;
-    min-height: 2.875rem;
-    padding: 0.7rem 1.35rem;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    padding: 0.625rem 1.25rem;
+    border-radius: 9999px;
     font-family: var(--font-mono);
-    font-size: 0.75rem;
+    font-size: var(--text-label-lg);
+    line-height: 1.2;
     font-weight: 500;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
+    letter-spacing: 0.025em;
     border: 1px solid transparent;
     transition:
-      background-color 180ms ease,
-      color 180ms ease,
-      border-color 180ms ease;
+      background-color 120ms var(--ease-standard),
+      color 120ms var(--ease-standard),
+      border-color 120ms var(--ease-standard);
     white-space: nowrap;
     cursor: pointer;
   }
+  /* Dark pill that turns electric blue on hover (mockup header CTA). */
   .btn-primary {
-    background: var(--color-copper-400);
-    color: var(--color-ink-950);
+    background: var(--color-fg);
+    color: var(--color-on-primary);
   }
   .btn-primary:hover {
-    background: var(--color-copper-300);
+    background: var(--color-primary-bright);
+  }
+  .btn-accent {
+    background: var(--color-primary-bright);
+    color: var(--color-on-primary);
+  }
+  .btn-accent:hover {
+    background: var(--color-primary);
   }
   .btn-outline {
-    border-color: color-mix(in oklab, var(--color-bone-100) 35%, transparent);
-    color: var(--color-bone-50);
+    background: var(--color-surface-lowest);
+    border-color: var(--color-line);
+    color: var(--color-fg);
   }
   .btn-outline:hover {
-    border-color: var(--color-bone-50);
-    background: color-mix(in oklab, var(--color-bone-50) 6%, transparent);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
   }
   .btn-ghost {
-    color: var(--color-bone-300);
-    padding-inline: 0.25rem;
+    color: var(--color-fg-muted);
+    padding-inline: 0.5rem;
   }
   .btn-ghost:hover {
-    color: var(--color-bone-50);
+    color: var(--color-primary);
+  }
+
+  /* Outline pill chip (#tags, skills). */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border: 1px solid var(--color-line);
+    border-radius: 9999px;
+    background: var(--color-surface-lowest);
+    font-family: var(--font-mono);
+    font-size: var(--text-label-md);
+    line-height: var(--text-label-md--line-height);
+    color: var(--color-fg-muted);
   }
 
   /* Long-form text from the CMS (Markdown bodies, biographies). */
   .prose-art {
     max-width: var(--container-prose);
-    color: var(--color-bone-300);
-    font-size: 1.0625rem;
-    line-height: 1.75;
+    color: var(--color-fg-muted);
+    font-size: 1rem;
+    line-height: 1.7;
   }
   .prose-art > * + * {
     margin-top: 1.1em;
@@ -239,15 +313,15 @@
   .prose-art h2,
   .prose-art h3 {
     font-family: var(--font-display);
-    color: var(--color-bone-50);
+    color: var(--color-fg);
     line-height: 1.2;
     margin-top: 2em;
   }
-  .prose-art h2 { font-size: 1.6rem; }
-  .prose-art h3 { font-size: 1.3rem; }
-  .prose-art strong { color: var(--color-bone-100); font-weight: 600; }
+  .prose-art h2 { font-size: 1.5rem; }
+  .prose-art h3 { font-size: 1.25rem; }
+  .prose-art strong { color: var(--color-fg); font-weight: 600; }
   .prose-art a {
-    color: var(--color-copper-400);
+    color: var(--color-primary);
     text-decoration: underline;
     text-underline-offset: 0.2em;
     text-decoration-thickness: 1px;
@@ -261,34 +335,33 @@
     content: '';
     position: absolute;
     left: 0;
-    top: 0.78em;
-    width: 0.6em;
-    height: 1px;
-    background: var(--color-copper-500);
+    top: 0.72em;
+    width: 0.45em;
+    height: 0.45em;
+    background: var(--color-primary-bright);
   }
   .prose-art ol { list-style: decimal; padding-left: 1.3em; }
   .prose-art blockquote {
-    border-left: 1px solid var(--color-copper-500);
+    border-left: 2px solid var(--color-primary-bright);
     padding-left: 1.2em;
-    font-family: var(--font-display);
-    font-size: 1.25rem;
-    color: var(--color-bone-100);
+    font-size: 1.125rem;
+    color: var(--color-fg);
   }
   .prose-art code {
     font-family: var(--font-mono);
     font-size: 0.9em;
-    color: var(--color-bone-100);
+    color: var(--color-fg);
   }
 
   /* Image well – loading placeholder that reads as "artwork goes here". */
   .art-well {
     position: relative;
     overflow: hidden;
-    background-color: var(--color-ink-850);
+    background-color: var(--color-surface-container);
     background-image:
-      linear-gradient(var(--color-ink-800) 1px, transparent 1px),
-      linear-gradient(90deg, var(--color-ink-800) 1px, transparent 1px);
-    background-size: 32px 32px;
+      linear-gradient(var(--color-surface-high) 1px, transparent 1px),
+      linear-gradient(90deg, var(--color-surface-high) 1px, transparent 1px);
+    background-size: 24px 24px;
     background-position: center;
   }
   .art-well > img,
@@ -304,14 +377,22 @@
     display: inline-flex;
     align-items: center;
     gap: 0.4em;
-    padding: 0.2em 0.55em;
+    padding: 0.25em 0.65em;
+    border-radius: 9999px;
     font-family: var(--font-mono);
     font-size: 0.625rem;
-    font-weight: 600;
-    letter-spacing: 0.14em;
+    font-weight: 500;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--color-ink-950);
-    background: #e5c07b;
+    color: var(--color-fg);
+    background: var(--color-placeholder);
+  }
+}
+
+/* Content that exists only in the printed / PDF document (the screen shows a summary view). */
+@media screen {
+  .print-only {
+    display: none !important;
   }
 }
 
@@ -319,13 +400,55 @@
 @media (prefers-reduced-motion: no-preference) {
   .js [data-reveal] {
     opacity: 0;
-    transform: translateY(18px);
+    transform: translateY(12px);
     transition:
-      opacity 700ms var(--ease-out-quart),
-      transform 700ms var(--ease-out-quart);
+      opacity 500ms var(--ease-enter),
+      transform 500ms var(--ease-enter);
   }
   .js [data-reveal].is-visible {
     opacity: 1;
     transform: none;
   }
 }
+
+/* Shared geometry from the supplied portfolio references. */
+.reference-shell { max-width: 1440px; min-height: 1024px; margin-inline: auto; padding: 16px; display: flex; flex-direction: column; gap: 24px; }
+.reference-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 24px; }
+.reference-shell .reference-header { padding: 0; }
+.reference-nav { display: flex; flex-wrap: wrap; gap: 4px; padding: 4px; border: 1px solid var(--color-line); border-radius: 9999px; background: white; }
+.reference-nav a { padding: 8px 24px; border-radius: 9999px; font: 500 12px/16px var(--font-mono); letter-spacing: .6px; text-transform: uppercase; }
+.reference-nav a[aria-current=page] { background: var(--color-fg); color: white; }
+.reference-nav a:hover { background: var(--color-surface-low); color: var(--color-fg); }
+.reference-reel { display: inline-flex; align-items: center; gap: 8px; padding: 8px 32px; border-radius: 9999px; background: var(--color-fg); color: white; font: 500 12px/16px var(--font-mono); text-transform: uppercase; }
+.reference-reel:hover { background: var(--color-primary-bright); }
+.reference-page #main { padding-top: 0; flex: 1; display: flex; flex-direction: column; }
+.reference-page .container-page { padding-inline: 0; }
+.reference-about, .reference-hero, .reference-resume { flex: 1; }
+.reference-page .display { font-weight: 700; }
+.reference-page .text-display-lg { font-size: 32px; line-height: 36px; letter-spacing: -.75px; }
+.reference-page .text-display-md { font-size: 28px; line-height: 32px; letter-spacing: -.5px; }
+.reference-page:has(.reference-work, .reference-detail, .reference-resume) .reference-header { padding-bottom: 16px; border-bottom: 1px solid var(--color-line); }
+.reference-detail { min-height: 900px; }
+@media (min-width: 768px) {
+  .reference-shell { padding: 24px; }
+  .reference-page .text-display-lg { font-size: 56px; line-height: 60px; letter-spacing: -1.5px; }
+  .reference-page .text-display-md { font-size: 40px; line-height: 44px; letter-spacing: -1px; }
+}
+@media print { .reference-header { display: none; } .reference-shell { min-height: 0; padding: 0; display: block; } }
+
+.showcase-caption { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 16px; }
+.showcase-copy { max-width: 36rem; flex: 1 1 240px; }
+.showcase-copy p { margin-top: 4px; }
+.reference-hero .btn { min-height: 0; padding: 8px 24px; }
+.reference-hero [data-rail] { scrollbar-width: none; }
+.reference-hero [data-rail]::-webkit-scrollbar { display: none; }
+.reference-page .text-display-sm { font-size: 32px; line-height: 38px; letter-spacing: -.5px; }
+@media screen {
+ .reference-resume > .resume-section { display: none; }
+ .reference-resume > .resume-section:target { display: block; }
+ .reference-resume > h2 { display: none; }
+}
+
+.reference-detail { grid-template-columns: minmax(0, 1fr); }
+.reference-detail > section { min-width: 0; }
+@media (min-width: 1024px) { .reference-detail { grid-template-columns: repeat(12, minmax(0, 1fr)); } }

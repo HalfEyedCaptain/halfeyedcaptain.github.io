@@ -15,7 +15,7 @@ const label = title ?? 'Project video';
 <figure>
   {
     video ? (
-      <div class="relative aspect-video overflow-hidden bg-ink-850">
+      <div class="relative aspect-video overflow-hidden bg-surface-container">
         <iframe
           src={video.embedUrl}
           title={label}
@@ -27,7 +27,7 @@ const label = title ?? 'Project video';
         />
       </div>
     ) : (
-      <a href={videoUrl} target="_blank" rel="noopener" class="flex aspect-video items-center justify-center gap-3 bg-ink-850 text-bone-100 hover:text-copper-400">
+      <a href={videoUrl} target="_blank" rel="noopener" class="flex aspect-video items-center justify-center gap-3 bg-surface-container text-fg hover:text-primary">
         <Icon name="play" size={28} /> Watch video
       </a>
     )

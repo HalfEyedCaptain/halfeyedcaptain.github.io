@@ -1,6 +1,6 @@
 {
   "items": [
-    { "label": "Portfolio", "href": "/portfolio", "header": true, "footer": true },
+    { "label": "Work", "href": "/work", "header": true, "footer": true },
     { "label": "Game Credits", "href": "/games", "header": true, "footer": true },
     { "label": "About", "href": "/about", "header": true, "footer": true },
     { "label": "Résumé", "href": "/resume", "header": true, "footer": true },

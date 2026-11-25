@@ -14,14 +14,13 @@ interface Props {
   type?: 'website' | 'article' | 'profile';
   noindex?: boolean;
   jsonLd?: Record<string, unknown> | Record<string, unknown>[] | undefined;
-  /** Transparent header over a full-bleed hero. */
-  overlayHeader?: boolean;
   /** Extra class on <main>. */
   mainClass?: string;
 }
 
-const { overlayHeader = false, mainClass, ...seo } = Astro.props;
+const { mainClass, ...seo } = Astro.props;
 const settings = await getSettings();
+const referencePage = ['/', '/about', '/resume', '/work'].some((p) => p === '/' ? Astro.url.pathname === '/' : Astro.url.pathname.replace(/\/$/, '') === p || Astro.url.pathname.includes('/work/')); 
 ---
 
 <!doctype html>
@@ -29,8 +28,8 @@ const settings = await getSettings();
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#0b0a09" />
-    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#faf9f9" />
+    <meta name="color-scheme" content="light" />
     <meta name="generator" content={Astro.generator} />
     <link rel="icon" type="image/svg+xml" href={url('/favicon.svg')} />
     <link rel="sitemap" href={url('/sitemap-index.xml')} />
@@ -40,18 +39,20 @@ const settings = await getSettings();
     <SEO {...seo} />
     <slot name="head" />
   </head>
-  <body>
+  <body class:list={[referencePage && 'reference-page']}>
     <a
       href="#main"
-      class="sr-only z-50 bg-copper-400 px-4 py-3 font-mono text-xs tracking-widest text-ink-950 uppercase focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
+      class="sr-only z-50 rounded-full bg-primary-bright px-4 py-3 font-mono text-label-md text-on-primary uppercase focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
     >
       Skip to content
     </a>
-    <Header overlay={overlayHeader} />
-    <main id="main" tabindex="-1" class:list={['outline-none', !overlayHeader && 'pt-(--header-h)', mainClass]}>
+    <div class:list={[referencePage && 'reference-shell']}>
+    <Header />
+    <main id="main" tabindex="-1" class:list={['outline-none pt-(--header-h)', mainClass]}>
       <slot />
     </main>
-    <Footer />
+    </div>
+    {!referencePage && <Footer />}
 
     <script>
       // Gentle reveal-on-scroll. Content is always visible without JS or with reduced motion.

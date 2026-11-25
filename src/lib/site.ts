@@ -12,7 +12,7 @@ export function isExternal(href: string): boolean {
 
 /**
  * Turns a site-relative path into a base-aware URL.
- *   url('/portfolio')       → '/repo/portfolio/'
+ *   url('/work')            → '/repo/work/'
  *   url('/resume.pdf')      → '/repo/resume.pdf'
  *   url('#contact')         → '#contact'
  *   url('https://x.com')    → 'https://x.com'

@@ -20,13 +20,13 @@ const { title, label, intro, link, as: Tag = 'h2', id, class: className } = Astr
     {
       label && (
         <p class="label mb-4 flex items-center gap-3">
-          <span class="inline-block h-px w-8 bg-copper-500" aria-hidden="true" />
+          <span class="inline-block h-px w-8 bg-accent" aria-hidden="true" />
           {label}
         </p>
       )
     }
     <Tag id={id} class="display text-display-md">{title}</Tag>
-    {intro && <p class="mt-5 max-w-2xl text-bone-300">{intro}</p>}
+    {intro && <p class="mt-5 max-w-2xl text-fg-muted">{intro}</p>}
   </div>
   {
     link && (

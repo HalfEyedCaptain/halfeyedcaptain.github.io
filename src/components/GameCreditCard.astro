@@ -39,14 +39,14 @@ if (variant === 'full' && d.relatedProjects.length) {
     <h3 class:list={['display mt-2 leading-tight', variant === 'full' ? 'text-display-sm' : 'text-xl']}>{d.title}</h3>
     {
       (d.studio || d.publisher) && (
-        <p class="mt-2 text-sm text-bone-300">
+        <p class="mt-2 text-sm text-fg-muted">
           {d.studio}
-          {d.studio && d.publisher && d.publisher !== d.studio && <span class="text-bone-500"> / </span>}
+          {d.studio && d.publisher && d.publisher !== d.studio && <span class="text-fg-subtle"> / </span>}
           {d.publisher && d.publisher !== d.studio && d.publisher}
         </p>
       )
     }
-    {d.role && <p class="mt-3 font-mono text-xs tracking-[0.12em] text-copper-400 uppercase">{d.role}</p>}
+    {d.role && <p class="mt-3 font-mono text-xs tracking-[0.12em] text-primary uppercase">{d.role}</p>}
 
     {
       variant === 'full' && (
@@ -58,7 +58,7 @@ if (variant === 'full' && d.relatedProjects.length) {
               ))}
             </ul>
           )}
-          {d.creditNote && <p class="mt-4 text-sm text-bone-500 italic">{d.creditNote}</p>}
+          {d.creditNote && <p class="mt-4 text-sm text-fg-subtle italic">{d.creditNote}</p>}
           <div class="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
             {d.website && (
               <a href={d.website} class="btn btn-ghost !px-0" target="_blank" rel="noopener">
@@ -66,7 +66,7 @@ if (variant === 'full' && d.relatedProjects.length) {
               </a>
             )}
             {related.map((p) => (
-              <a href={url(`/portfolio/${p.slug}`)} class="btn btn-ghost !px-0">
+              <a href={url(`/work/${p.slug}`)} class="btn btn-ghost !px-0">
                 {p.title} <Icon name="arrow-right" size={14} />
               </a>
             ))}

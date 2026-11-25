@@ -17,7 +17,7 @@ import Icon from './Icon.astro';
         <a data-lb-original class="btn btn-ghost hidden !min-h-10 text-[0.6875rem]" target="_blank" rel="noopener">
           Full resolution <Icon name="arrow-up-right" size={14} />
         </a>
-        <button type="button" class="inline-flex h-11 w-11 items-center justify-center text-bone-100 hover:text-copper-400" data-lb-close>
+        <button type="button" class="inline-flex h-11 w-11 items-center justify-center text-fg hover:text-primary" data-lb-close>
           <Icon name="close" size={22} />
           <span class="sr-only">Close viewer</span>
         </button>
@@ -36,7 +36,7 @@ import Icon from './Icon.astro';
       </button>
     </div>
 
-    <p class="min-h-12 px-6 py-4 text-center text-sm text-bone-300" data-lb-caption></p>
+    <p class="min-h-12 px-6 py-4 text-center text-sm text-fg-muted" data-lb-caption></p>
   </div>
 </dialog>
 
@@ -49,14 +49,14 @@ import Icon from './Icon.astro';
     margin: 0;
     padding: 0;
     border: 0;
-    background: rgb(8 7 6 / 0.97);
-    color: var(--color-bone-100);
+    background: color-mix(in oklab, var(--color-surface) 97%, transparent);
+    color: var(--color-fg);
   }
   .lightbox::backdrop {
-    background: rgb(0 0 0 / 0.85);
+    background: color-mix(in oklab, var(--color-scrim) 40%, transparent);
   }
   .lightbox[open] {
-    animation: lb-in 220ms var(--ease-out-quart);
+    animation: lb-in 220ms var(--ease-enter);
   }
   @keyframes lb-in {
     from {
@@ -73,12 +73,17 @@ import Icon from './Icon.astro';
     transform: translateY(-50%);
     align-items: center;
     justify-content: center;
-    background: rgb(11 10 9 / 0.6);
-    color: var(--color-bone-100);
-    transition: color 150ms;
+    border: 1px solid var(--color-line);
+    border-radius: 9999px;
+    background: var(--color-surface-lowest);
+    color: var(--color-fg);
+    transition:
+      color 120ms var(--ease-standard),
+      border-color 120ms var(--ease-standard);
   }
   .lb-nav:hover {
-    color: var(--color-copper-400);
+    color: var(--color-primary);
+    border-color: var(--color-primary);
   }
   .lb-nav[hidden] {
     display: none;

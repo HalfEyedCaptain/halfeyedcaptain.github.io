@@ -1,198 +1,302 @@
 ---
+/**
+ * Work (design: work.html).
+ * A large preview box above a grid of square project tiles. Hovering or focusing a
+ * tile previews it above; clicking opens the project. Without JS the tiles are plain
+ * links and the preview shows the first project.
+ */
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import ProjectCard from '@/components/ProjectCard.astro';
-import Lightbox from '@/components/Lightbox.astro';
+import ArtImage from '@/components/ArtImage.astro';
 import EmptyState from '@/components/EmptyState.astro';
+import Icon from '@/components/Icon.astro';
+import PlaceholderBadge from '@/components/PlaceholderBadge.astro';
 import { getProfile, getProjects, getUsedCategories } from '@/lib/content';
+import { formatYear } from '@/lib/dates';
+import { url } from '@/lib/site';
 
 const [projects, profile] = await Promise.all([getProjects(), getProfile()]);
 const categories = await getUsedCategories(projects);
 const hasFeatured = projects.some((p) => p.data.featured);
-const hasPersonal = projects.some((p) => p.data.classification === 'personal');
-const hasProfessional = projects.some((p) => p.data.classification === 'professional');
+const showFilters = false;
+
+const thumbOf = (p: (typeof projects)[number]) => p.data.thumbnail ?? p.data.hero ?? p.data.renders[0];
+const heroOf = (p: (typeof projects)[number]) => p.data.hero ?? p.data.renders[0] ?? p.data.thumbnail;
 ---
 
 <BaseLayout
-  title="Portfolio"
-  description={`Character art portfolio of ${profile.name}: realistic and stylised characters, ZBrush digital sculptures and creatures.`}
+  title="Work"
+  description={`Character art by ${profile.name}: realistic and stylised characters, ZBrush digital sculptures and creatures.`}
 >
-  <section class="container-page pt-16 md:pt-24">
-    <p class="label mb-4 flex items-center gap-3">
-      <span class="inline-block h-px w-8 bg-copper-500" aria-hidden="true"></span>Portfolio
-    </p>
-    <h1 class="display text-display-lg max-w-4xl">Characters, sculpts &amp; studies</h1>
-    <p class="mt-6 max-w-2xl text-bone-300">
-      A selection of personal and professional character work. Select any project for high-poly sculpts, topology and texture breakdowns.
-    </p>
-  </section>
+  <div class="container-page flex flex-col gap-gutter-xl reference-work">
+    <h1 class="sr-only">Work — {profile.name}</h1>
 
-  {
-    projects.length === 0 ? (
-      <div class="container-page mt-16">
+    {
+      projects.length === 0 ? (
         <EmptyState title="Projects are on their way" message="New character work will be published here soon." />
-      </div>
-    ) : (
-      <>
-        <div class="sticky top-(--header-h) z-30 mt-12 border-y border-ink-700 bg-ink-950/90 backdrop-blur-md" data-filters hidden>
-          <div class="container-page flex flex-col gap-3 py-3 xl:flex-row xl:items-center xl:justify-between">
-            <div class="-mx-1 flex min-w-0 gap-1 overflow-x-auto pb-1 xl:pb-0" role="group" aria-label="Filter by category">
-              <button type="button" class="chip" data-filter-category="" aria-pressed="true">
-                All
-              </button>
-              {hasFeatured && (
-                <button type="button" class="chip" data-filter-category="__featured" aria-pressed="false">
-                  Featured
-                </button>
-              )}
-              {categories.map((c) => (
-                <button type="button" class="chip" data-filter-category={c.id} aria-pressed="false" title={c.description}>
-                  {c.label}
-                </button>
-              ))}
-            </div>
-            <div class="flex flex-wrap items-center gap-3">
-              {hasPersonal && hasProfessional && (
-                <div class="flex" role="group" aria-label="Filter by type">
-                  <button type="button" class="chip" data-filter-class="" aria-pressed="true">
-                    All work
-                  </button>
-                  <button type="button" class="chip" data-filter-class="professional" aria-pressed="false">
-                    Professional
-                  </button>
-                  <button type="button" class="chip" data-filter-class="personal" aria-pressed="false">
-                    Personal
-                  </button>
-                </div>
-              )}
-              <label class="flex items-center gap-2">
-                <span class="label">Sort</span>
-                <select data-sort class="border border-ink-700 bg-ink-900 px-3 py-2 font-mono text-xs tracking-wider text-bone-100 uppercase">
-                  <option value="curated">Curated</option>
-                  <option value="newest">Newest</option>
-                  <option value="oldest">Oldest</option>
-                  <option value="title">A–Z</option>
-                </select>
-              </label>
-            </div>
-          </div>
-        </div>
+      ) : (
+        <>
+          <!-- Preview box -->
+          <section aria-label="Project preview" class="relative isolate min-h-[480px] overflow-hidden rounded-lg border border-fg bg-inverse">
+            {projects.map((p, i) => {
+              const img = heroOf(p);
+              const wire = p.data.topology[0];
+              const year = formatYear(p.data.completed);
+              const meta = [p.categoryInfo?.label, year].filter(Boolean).join(' // ');
+              const specs = [...p.data.software.slice(0, 3), p.data.classification === 'professional' ? 'Professional' : 'Personal'].join(' // ');
+              return (
+                <article class="absolute inset-0 flex flex-col justify-end" data-preview={i} hidden={i > 0} aria-labelledby={`preview-title-${i}`}>
+                  <div class="absolute inset-0 -z-10">
+                    <ArtImage
+                      src={img?.src}
+                      alt={img?.alt || p.data.title}
+                      class="h-full w-full"
+                      aspect="auto"
+                      position="top"
+                      widths={[768, 1280, 1920, 2560]}
+                      sizes="(min-width: 1440px) 1360px, 100vw"
+                      priority={i === 0}
+                    />
+                    {wire && (
+                      <div class="absolute inset-0" data-wire hidden>
+                        <ArtImage src={wire.src} alt={wire.alt || `${p.data.title} — wireframe`} class="h-full w-full" aspect="auto" position="top" widths={[768, 1280, 1920]} sizes="100vw" />
+                      </div>
+                    )}
+                    <div class="absolute inset-0 bg-linear-to-r from-scrim/90 via-scrim/45 to-transparent" aria-hidden="true" />
+                    <div class="absolute inset-0 bg-linear-to-t from-scrim/85 via-transparent to-transparent" aria-hidden="true" />
+                  </div>
 
-        <section class="container-page mt-12" aria-label="Projects">
-          <p class="label mb-8" aria-live="polite" data-count>
-            {projects.length} {projects.length === 1 ? 'project' : 'projects'}
-          </p>
-          <div class="grid gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-3" data-grid>
-            {projects.map((p, i) => (
-              <ProjectCard project={p} expandable headingLevel="h2" priority={i < 3} />
-            ))}
-          </div>
-          <div hidden data-empty>
-            <EmptyState title="No projects match these filters" message="Try another category or show all work." />
-          </div>
-        </section>
-        <Lightbox />
-      </>
-    )
-  }
+                  <div class="flex max-w-2xl flex-col gap-gutter-md p-gutter-xl">
+                    <div class="flex flex-wrap items-center gap-gutter-sm">
+                      {meta && <span class="rounded-full bg-primary-bright px-gutter-md py-gutter-xs font-mono text-label-md text-on-primary uppercase">{meta}</span>}
+                      <span class="font-mono text-label-md text-on-inverse uppercase">{specs}</span>
+                    </div>
+                    <h2 id={`preview-title-${i}`} class="display text-display-md text-balance text-on-scrim">{p.data.title}</h2>
+                    {p.data.summary && <p class="max-w-prose text-body-md text-pretty text-on-inverse">{p.data.summary}</p>}
+                    <div class="flex flex-wrap items-center gap-gutter-md pt-gutter-xs">
+                      <a href={url(`/work/${p.slug}`)} class="btn btn-accent">
+                        Inspect breakdown <Icon name="arrow-up-right" size={16} />
+                      </a>
+                      {wire && (
+                        <button type="button" class="wire-btn" aria-pressed="false" data-wire-toggle hidden>
+                          <Icon name="cube" size={18} />
+                          <span class="sr-only">Show wireframe</span>
+                        </button>
+                      )}
+                      <PlaceholderBadge show={p.data.placeholder} />
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </section>
+
+          <!-- Tiles -->
+          <section aria-labelledby="works-heading" class="flex flex-col gap-gutter-md">
+            <div class="flex flex-wrap items-baseline justify-between gap-gutter-md">
+              <h2 id="works-heading" class="display text-headline-md">Selected Works</h2>
+              <span class="label" aria-live="polite" data-count>
+                {projects.length} {projects.length === 1 ? 'project' : 'projects'}
+                <span class="hidden" data-hint> · Hover to preview, click to open</span>
+              </span>
+            </div>
+
+            {showFilters && (
+              <div class="pill-group self-start overflow-x-auto [scrollbar-width:none]" role="group" aria-label="Filter by category" data-filters hidden>
+                <button type="button" class="filter-pill" data-filter="" aria-pressed="true">All</button>
+                {hasFeatured && (
+                  <button type="button" class="filter-pill" data-filter="__featured" aria-pressed="false">Featured</button>
+                )}
+                {categories.map((c) => (
+                  <button type="button" class="filter-pill" data-filter={c.id} aria-pressed="false" title={c.description}>
+                    {c.label}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <ul class="grid grid-cols-2 gap-gutter-md sm:grid-cols-3 lg:grid-cols-6" data-tiles>
+              {projects.map((p, i) => {
+                const t = thumbOf(p);
+                return (
+                  <li data-tile={i} data-category={p.data.category ?? ''} data-featured={String(p.data.featured)}>
+                    <a
+                      href={url(`/work/${p.slug}`)}
+                      class:list={['tile group relative block aspect-square overflow-hidden rounded-md bg-inverse', i === 0 && 'is-active']}
+                      aria-label={`${p.data.title}${p.categoryInfo ? ` — ${p.categoryInfo.label}` : ''}`}
+                    >
+                      <ArtImage
+                        src={t?.src}
+                        alt=""
+                        class="h-full w-full"
+                        aspect="auto"
+                        position="top"
+                        widths={[240, 400, 640]}
+                        sizes="(min-width: 1024px) 16vw, (min-width: 640px) 33vw, 50vw"
+                        imgClass="transition-transform duration-220 ease-(--ease-enter) group-hover:scale-105"
+                      />
+                      <span class="absolute inset-x-0 bottom-0 flex items-end bg-linear-to-t from-scrim/90 to-transparent p-gutter-sm pt-gutter-xl" aria-hidden="true">
+                        <span class="truncate font-mono text-label-md text-on-scrim uppercase">{p.data.title}</span>
+                      </span>
+                      {p.data.placeholder && <span class="absolute top-gutter-sm left-gutter-sm h-2 w-2 rounded-full bg-placeholder" title="Placeholder" aria-hidden="true" />}
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+            <p hidden data-empty class="text-body-md text-fg-subtle">No projects in this category yet.</p>
+          </section>
+
+        </>
+      )
+    }
+  </div>
 </BaseLayout>
 
 <style>
-  .chip {
-    flex-shrink: 0;
-    padding: 0.55rem 0.9rem;
-    font-family: var(--font-mono);
-    font-size: 0.6875rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--color-bone-300);
-    border: 1px solid transparent;
+  .tile {
+    border: 1px solid var(--color-fg);
     transition:
-      color 150ms,
-      border-color 150ms,
-      background-color 150ms;
+      border-color 120ms var(--ease-standard),
+      box-shadow 120ms var(--ease-standard);
+  }
+  .tile:hover {
+    border-color: var(--color-primary-bright);
+  }
+  .tile.is-active {
+    border-color: var(--color-primary-bright);
+    box-shadow: 0 0 0 2px var(--color-primary-bright);
+  }
+  .wire-btn {
+    display: inline-flex;
+    width: 2.5rem;
+    height: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid color-mix(in oklab, var(--color-on-scrim) 50%, transparent);
+    border-radius: 9999px;
+    background: color-mix(in oklab, var(--color-inverse) 80%, transparent);
+    color: var(--color-on-scrim);
+    transition:
+      background-color 120ms var(--ease-standard),
+      color 120ms var(--ease-standard);
+  }
+  .wire-btn:hover,
+  .wire-btn[aria-pressed='true'] {
+    background: var(--color-surface-lowest);
+    color: var(--color-fg);
+  }
+  .pill-group {
+    display: flex;
+    max-width: 100%;
+    gap: 0.25rem;
+    padding: 0.25rem;
+    border: 1px solid var(--color-line);
+    border-radius: 9999px;
+    background: var(--color-surface-lowest);
+  }
+  .filter-pill {
+    flex-shrink: 0;
+    padding: 0.4rem 0.9rem;
+    border-radius: 9999px;
+    font-family: var(--font-mono);
+    font-size: var(--text-label-lg);
+    line-height: 1.4;
+    color: var(--color-fg-muted);
     white-space: nowrap;
+    transition:
+      color 120ms var(--ease-standard),
+      background-color 120ms var(--ease-standard);
   }
-  .chip:hover {
-    color: var(--color-bone-50);
+  .filter-pill:hover {
+    color: var(--color-fg);
+    background: var(--color-surface-low);
   }
-  .chip[aria-pressed='true'] {
-    color: var(--color-ink-950);
-    background: var(--color-bone-100);
+  .filter-pill[aria-pressed='true'] {
+    color: var(--color-on-primary);
+    background: var(--color-fg);
+  }
+  [data-preview]:not([hidden]) {
+    animation: preview-in 220ms var(--ease-enter);
+  }
+  @keyframes preview-in {
+    from {
+      opacity: 0.4;
+    }
   }
 </style>
 
 <script>
-  const bar = document.querySelector<HTMLElement>('[data-filters]');
-  const grid = document.querySelector<HTMLElement>('[data-grid]');
-  if (bar && grid) {
-    bar.hidden = false;
-    const cards = [...grid.querySelectorAll<HTMLElement>('[data-project]')];
-    const originalOrder = [...cards];
-    const countEl = document.querySelector<HTMLElement>('[data-count]');
-    const emptyEl = document.querySelector<HTMLElement>('[data-empty]');
-    const sortEl = bar.querySelector<HTMLSelectElement>('[data-sort]')!;
-    const catButtons = [...bar.querySelectorAll<HTMLButtonElement>('[data-filter-category]')];
-    const classButtons = [...bar.querySelectorAll<HTMLButtonElement>('[data-filter-class]')];
+  const previews = [...document.querySelectorAll<HTMLElement>('[data-preview]')];
+  const items = [...document.querySelectorAll<HTMLElement>('[data-tile]')];
+  let active = 0;
 
-    const params = new URLSearchParams(location.search);
-    const state = {
-      category: params.get('category') ?? '',
-      kind: params.get('type') ?? '',
-      sort: params.get('sort') ?? 'curated',
-    };
-    if (!catButtons.some((b) => b.dataset.filterCategory === state.category)) state.category = '';
-    if (!['curated', 'newest', 'oldest', 'title'].includes(state.sort)) state.sort = 'curated';
+  const select = (i: number) => {
+    if (i === active || !previews[i]) return;
+    previews.forEach((p, j) => (p.hidden = j !== i));
+    items.forEach((li, j) => li.querySelector('.tile')?.classList.toggle('is-active', j === i));
+    active = i;
+  };
+
+  items.forEach((li) => {
+    const i = Number(li.dataset.tile);
+    const a = li.querySelector('a')!;
+    a.addEventListener('mouseenter', () => select(i));
+    a.addEventListener('focus', () => select(i));
+  });
+  document.querySelector('[data-hint]')?.classList.remove('hidden');
+
+  // Wireframe overlay toggles (only when the project has topology images).
+  previews.forEach((p) => {
+    const btn = p.querySelector<HTMLButtonElement>('[data-wire-toggle]');
+    const wire = p.querySelector<HTMLElement>('[data-wire]');
+    if (!btn || !wire) return;
+    btn.hidden = false;
+    btn.addEventListener('click', () => {
+      const on = btn.getAttribute('aria-pressed') !== 'true';
+      btn.setAttribute('aria-pressed', String(on));
+      btn.querySelector('.sr-only')!.textContent = on ? 'Hide wireframe' : 'Show wireframe';
+      wire.hidden = !on;
+    });
+  });
+
+  // Category filter (deep-linkable via ?category=).
+  const bar = document.querySelector<HTMLElement>('[data-filters]');
+  if (bar) {
+    bar.hidden = false;
+    const buttons = [...bar.querySelectorAll<HTMLButtonElement>('[data-filter]')];
+    const countEl = document.querySelector<HTMLElement>('[data-count]');
+    const hint = countEl?.querySelector('[data-hint]');
+    const emptyEl = document.querySelector<HTMLElement>('[data-empty]');
+    let current = new URLSearchParams(location.search).get('category') ?? '';
+    if (!buttons.some((b) => b.dataset.filter === current)) current = '';
 
     const apply = () => {
-      catButtons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.filterCategory === state.category)));
-      classButtons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.filterClass === state.kind)));
-      sortEl.value = state.sort;
-
+      buttons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.filter === current)));
       let visible = 0;
-      for (const card of cards) {
-        const catOk =
-          !state.category ||
-          (state.category === '__featured' ? card.dataset.featured === 'true' : card.dataset.category === state.category);
-        const kindOk = !state.kind || card.dataset.classification === state.kind;
-        const show = catOk && kindOk;
-        card.hidden = !show;
-        if (show) visible++;
+      let first = -1;
+      items.forEach((li) => {
+        const ok = !current || (current === '__featured' ? li.dataset.featured === 'true' : li.dataset.category === current);
+        li.hidden = !ok;
+        if (ok) {
+          visible++;
+          if (first < 0) first = Number(li.dataset.tile);
+        }
+      });
+      if (first >= 0 && items[active]?.hidden) select(first);
+      if (countEl) {
+        countEl.firstChild!.textContent = `${visible} ${visible === 1 ? 'project' : 'projects'}`;
+        if (hint) countEl.append(hint);
       }
-
-      const sorted = [...originalOrder];
-      const num = (el: HTMLElement, k: string) => Number(el.dataset[k] ?? 0);
-      if (state.sort === 'newest') sorted.sort((a, b) => num(b, 'date') - num(a, 'date'));
-      if (state.sort === 'oldest') sorted.sort((a, b) => num(a, 'date') - num(b, 'date'));
-      if (state.sort === 'title') sorted.sort((a, b) => (a.dataset.title ?? '').localeCompare(b.dataset.title ?? ''));
-      grid.append(...sorted);
-
-      if (countEl) countEl.textContent = `${visible} ${visible === 1 ? 'project' : 'projects'}`;
       if (emptyEl) emptyEl.hidden = visible > 0;
-
-      const q = new URLSearchParams();
-      if (state.category) q.set('category', state.category);
-      if (state.kind) q.set('type', state.kind);
-      if (state.sort !== 'curated') q.set('sort', state.sort);
-      const qs = q.toString();
-      history.replaceState(null, '', qs ? `?${qs}` : location.pathname);
+      history.replaceState(null, '', current ? `?category=${encodeURIComponent(current)}` : location.pathname);
     };
 
-    catButtons.forEach((b) =>
+    buttons.forEach((b) =>
       b.addEventListener('click', () => {
-        state.category = b.dataset.filterCategory ?? '';
+        current = b.dataset.filter ?? '';
         apply();
       }),
     );
-    classButtons.forEach((b) =>
-      b.addEventListener('click', () => {
-        state.kind = b.dataset.filterClass ?? '';
-        apply();
-      }),
-    );
-    sortEl.addEventListener('change', () => {
-      state.sort = sortEl.value;
-      apply();
-    });
     apply();
   }
 </script>

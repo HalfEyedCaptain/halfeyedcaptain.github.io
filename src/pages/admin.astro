@@ -15,19 +15,19 @@ const cmsUrl = settings.cms.url ?? 'https://app.pagescms.org/';
   <section class="container-page max-w-3xl pt-16 md:pt-24">
     <p class="label mb-4">Admin</p>
     <h1 class="display text-display-lg">Edit this website</h1>
-    <p class="mt-6 text-lg text-bone-300">
-      Content is managed with <strong class="text-bone-100">Pages CMS</strong>, a free editor that saves changes directly to the website's GitHub repository.
+    <p class="mt-6 text-lg text-fg-muted">
+      Content is managed with <strong class="text-fg">Pages CMS</strong>, a free editor that saves changes directly to the website's GitHub repository.
       Every change you publish rebuilds and redeploys the site automatically within a few minutes.
     </p>
     <a href={cmsUrl} class="btn btn-primary mt-10" rel="noopener">
       Open the editor <Icon name="arrow-up-right" size={16} />
     </a>
-    <div class="mt-14 border-t border-ink-700 pt-8 text-sm text-bone-500">
+    <div class="mt-14 border-t border-line pt-8 text-sm text-fg-subtle">
       <p>
         You will be asked to sign in with GitHub on pagescms.org. Only GitHub accounts with write access to the repository can edit content. This website
         itself stores no passwords or access tokens.
       </p>
-      <p class="mt-4">Step-by-step help: see <code class="text-bone-300">ARTIST_GUIDE.md</code> in the repository.</p>
+      <p class="mt-4">Step-by-step help: see <code class="text-fg-muted">ARTIST_GUIDE.md</code> in the repository.</p>
     </div>
   </section>
 </BaseLayout>
