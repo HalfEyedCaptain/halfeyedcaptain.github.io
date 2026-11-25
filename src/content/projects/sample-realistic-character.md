@@ -1,18 +1,21 @@
 ---
 title: Eloise
-slug: sample-realistic-character
+slug: eloise
 status: published
 featured: true
-order: 10
-placeholder: true
-summary: "[Placeholder] One or two sentences describing the character and the
-  goal of the project. This appears on cards and at the top of the project
-  page."
-category: realistic-characters
+order: 1
+placeholder: false
+summary: Hi Guys, I am wrapping up an old project, Eloise. I was inspired by a
+  friend of mines' concept and was wanting to try something cell shaded. Initial
+  plan was to hand paint it and get the desired result, but then i came across
+  Lee Devonald's cell shade for marmoset and it worked a lot better for me.
+  Looking back, there are some things i would have done differently, but for now
+  i am happy with the results and gonna move on.
+category: src/content/categories/stylized-characters.json
 classification: personal
 completed: 2026-01-15
 tags:
-  - Placeholder
+  - Stylized
 software:
   - ZBrush
 responsibilities:
