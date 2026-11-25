@@ -10,16 +10,15 @@ import Icon, { type IconName } from '@/components/Icon.astro';
 import DisclosureHeading from '@/components/DisclosureHeading.astro';
 import Paragraphs from '@/components/Paragraphs.astro';
 import PlaceholderBadge from '@/components/PlaceholderBadge.astro';
-import { getAbout, getProfile, getSkills, getExperience, getSelectedProjects, getResumePdfPath } from '@/lib/content';
+import { getAbout, getProfile, getSkills, getExperience, getResumePdfPath } from '@/lib/content';
 import { personLd } from '@/lib/structured-data';
 import { url } from '@/lib/site';
 
-const [about, profile, skills, jobs, projects, pdf] = await Promise.all([
+const [about, profile, skills, jobs, pdf] = await Promise.all([
   getAbout(),
   getProfile(),
   getSkills(),
   getExperience(),
-  getSelectedProjects(),
   getResumePdfPath(),
 ]);
 const portraitIsPlaceholder = Boolean(about.portrait?.src.includes('placeholder'));
@@ -27,8 +26,6 @@ const portraitIsPlaceholder = Boolean(about.portrait?.src.includes('placeholder'
 // Introduction card
 const discipline = profile.title.replace(/^./, (c) => c.toUpperCase());
 const introTitle = profile.location ? `A ${discipline} based in ${profile.location}` : `A ${discipline}`;
-const latest = projects[0];
-const latestThumb = latest ? (latest.data.thumbnail ?? latest.data.hero ?? latest.data.renders[0]) : undefined;
 
 // Get in touch — only links that actually exist in the profile.
 const NAMES: Record<string, string> = { artstation: 'ArtStation', linkedin: 'LinkedIn', github: 'GitHub', instagram: 'Instagram', x: 'X', youtube: 'YouTube', vimeo: 'Vimeo', sketchfab: 'Sketchfab', behance: 'Behance', website: 'Website' };
@@ -94,21 +91,12 @@ const cols = ['', 'sm:grid-cols-1', 'sm:grid-cols-2', 'sm:grid-cols-3'][Math.min
     <div class="flex flex-col justify-between gap-gutter-xl lg:col-span-7">
       <section aria-labelledby="intro-heading">
         <DisclosureHeading id="intro-heading" title="Introduction" controls="intro-panel" class="mb-gutter-md" />
-        <div id="intro-panel" class="grid items-center gap-gutter-lg rounded-md border border-fg bg-surface-lowest p-gutter-xl md:grid-cols-12">
-          <div class:list={['flex flex-col gap-gutter-md', latestThumb ? 'md:col-span-8' : 'md:col-span-12']}>
+        <div id="intro-panel" class="rounded-md border border-fg bg-surface-lowest p-gutter-xl">
+          <div class="flex flex-col gap-gutter-md">
             <h3 class="text-title-lg font-semibold text-fg">{introTitle}</h3>
             <Paragraphs text={profile.bio} class="flex flex-col gap-gutter-sm text-body-md text-fg-muted" />
           </div>
-          {
-            latest && latestThumb && (
-              <a href={url(`/work/${latest.slug}`)} class="group flex flex-col gap-gutter-sm md:col-span-4 md:items-center">
-                <div class="w-36 overflow-hidden rounded-md border border-fg">
-                  <ArtImage src={latestThumb.src} alt={latestThumb.alt || latest.data.title} aspect="1 / 1" widths={[160, 320]} sizes="144px" />
-                </div>
-                
-              </a>
-            )
-          }
+
         </div>
       </section>
 
