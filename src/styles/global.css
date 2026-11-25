@@ -427,7 +427,6 @@
 .reference-page .display { font-weight: 700; }
 .reference-page .text-display-lg { font-size: 32px; line-height: 36px; letter-spacing: -.75px; }
 .reference-page .text-display-md { font-size: 28px; line-height: 32px; letter-spacing: -.5px; }
-.reference-page:has(.reference-work, .reference-detail, .reference-resume) .reference-header { padding-bottom: 16px; border-bottom: 1px solid var(--color-line); }
 .reference-detail { min-height: 900px; }
 @media (min-width: 768px) {
   .reference-shell { padding: 24px; }
