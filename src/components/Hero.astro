@@ -38,9 +38,9 @@ const latestYear = passes.map((p) => formatYear(p.data.completed)).find(Boolean)
     {
       projects.length > 0 && (
         <div>
-          <div class="mb-gutter-md flex items-center justify-between gap-gutter-md">
+          <div class="mb-gutter-sm flex items-center justify-between gap-gutter-md">
             <p class="label">Other Works // Archive</p>
-            <div class="flex gap-gutter-sm" data-rail-controls hidden>
+            <div class="flex gap-gutter-xs" data-rail-controls hidden>
               <button type="button" class="rail-btn" data-rail-dir="-1" aria-label="Scroll selected work left">
                 <Icon name="chevron-left" size={16} />
               </button>
@@ -49,7 +49,7 @@ const latestYear = passes.map((p) => formatYear(p.data.completed)).find(Boolean)
               </button>
             </div>
           </div>
-          <ul class="flex snap-x snap-mandatory gap-gutter-md overflow-x-auto pb-gutter-sm [scrollbar-width:thin]" data-rail>
+          <ul class="flex snap-x snap-mandatory gap-gutter-md overflow-x-auto pb-gutter-xs [scrollbar-width:none]" data-rail>
             {projects.map((p) => {
               const t = thumbOf(p);
               return (
@@ -63,7 +63,7 @@ const latestYear = passes.map((p) => formatYear(p.data.completed)).find(Boolean)
                       sizes="160px"
                       imgClass="transition-transform duration-500 ease-(--ease-enter) group-hover:scale-[1.04]"
                     />
-                    <span class="absolute inset-x-gutter-sm bottom-gutter-sm truncate rounded-full bg-inverse/85 px-gutter-sm py-gutter-xs text-center font-mono text-label-md text-on-inverse">
+                    <span class="absolute inset-x-gutter-sm bottom-gutter-sm truncate rounded-full bg-inverse/85 px-gutter-sm py-gutter-xs text-center font-mono text-label-md text-on-inverse uppercase">
                       {p.data.title}
                     </span>
                   </a>
@@ -76,17 +76,19 @@ const latestYear = passes.map((p) => formatYear(p.data.completed)).find(Boolean)
     }
 
     <div class:list={['flex flex-col gap-gutter-lg', projects.length > 0 && 'border-t border-line pt-gutter-md']}>
+      <div class="flex flex-col gap-gutter-sm">
       <div class="flex flex-wrap items-center gap-gutter-sm">
-        {eyebrow && <p class="font-mono text-label-lg text-primary">{eyebrow}</p>}
-        {subheading && <p class="font-mono text-label-lg text-fg-subtle">/ {subheading}</p>}
+        {eyebrow && <p class="font-mono text-label-md text-primary uppercase">{eyebrow}</p>}
+        {subheading && <p class="font-mono text-label-md text-primary uppercase">// {subheading}</p>}
       </div>
-      <h1 id="hero-title" class="display text-display-lg text-fg"><a href={url('/about')}>{heading}</a></h1>
-      {intro && <p class="max-w-xl text-body-md text-fg-muted">{intro}</p>}
+      <h1 id="hero-title" class="display text-display-lg text-fg text-balance"><a href={url('/about')}>{heading}</a></h1>
+      {intro && <p class="mt-gutter-xs max-w-prose text-body-md text-pretty text-fg-muted">{intro}</p>}
+      </div>
       {
         chips.length > 0 && (
           <ul class="flex flex-wrap gap-gutter-sm" aria-label="Core skills">
             {chips.map((c) => (
-              <li class="chip">#{c.split(/\s+/).map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join('')}</li>
+              <li class="hero-skill">#{c.split(/\s+/).map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join('')}</li>
             ))}
           </ul>
         )
@@ -115,13 +117,13 @@ const latestYear = passes.map((p) => formatYear(p.data.completed)).find(Boolean)
                   sizes="(min-width: 1024px) 55vw, 100vw"
                   priority={i === 0}
                 />
-                <div class="absolute inset-0 bg-linear-to-t from-scrim/90 via-scrim/25 to-transparent" aria-hidden="true" />
+                <div class="absolute inset-0 bg-linear-to-t from-scrim/90 via-transparent to-scrim/20" aria-hidden="true" />
               </div>
               <div class="showcase-caption p-gutter-lg">
                 {specs.length > 0 && (
                   <ul class="absolute right-6 top-1/2 flex -translate-y-1/2 flex-col items-end gap-gutter-md">
-                    {specs.map((s) => (
-                      <li class="rounded-full border border-line bg-surface-lowest px-gutter-md py-gutter-sm font-mono text-label-md text-fg">{s}</li>
+                    {specs.map((s, j) => (
+                      <li class="inline-flex items-center gap-gutter-sm rounded-full border border-line bg-surface-lowest px-gutter-md py-gutter-sm font-mono text-label-md text-fg uppercase"><span class:list={['h-2 w-2 shrink-0 rounded-full', j === 0 ? 'bg-primary' : 'bg-fg']} aria-hidden="true" />{s}</li>
                     ))}
                   </ul>
                 )}
@@ -151,7 +153,7 @@ const latestYear = passes.map((p) => formatYear(p.data.completed)).find(Boolean)
     }
 
     <div class="pointer-events-none absolute inset-x-0 top-0 flex flex-row-reverse items-start justify-between gap-gutter-md p-gutter-lg">
-      <p class="rounded-full bg-surface-lowest/90 px-gutter-md py-gutter-xs font-mono text-label-md text-primary uppercase backdrop-blur">
+      <p class="rounded-full border border-surface-lowest bg-surface-lowest px-gutter-md py-gutter-xs font-mono text-label-md text-primary uppercase backdrop-blur">
         Latest work{latestYear ? ` // ${latestYear}` : ''}
       </p>
       {
@@ -170,6 +172,16 @@ const latestYear = passes.map((p) => formatYear(p.data.completed)).find(Boolean)
 </section>
 
 <style>
+  .hero-skill {
+    border: 1px solid var(--color-fg);
+    border-radius: 9999px;
+    padding: 4px 16px;
+    background: var(--color-surface-lowest);
+    font: 500 12px/16px var(--font-mono);
+    letter-spacing: .6px;
+    text-transform: uppercase;
+  }
+
   .rail-btn {
     display: inline-flex;
     width: 2rem;

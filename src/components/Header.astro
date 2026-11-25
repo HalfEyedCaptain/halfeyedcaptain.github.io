@@ -1,11 +1,12 @@
 ---
-/** Site header: name mark, pill-tab primary nav, CTA pill and a mobile disclosure menu. */
+/** Site header with profile name, page navigation and ArtStation link. */
 import Icon from './Icon.astro';
 import { getProfile } from '@/lib/content';
 import { url, withoutBase } from '@/lib/site';
 
 const profile = await getProfile();
 const current = withoutBase(Astro.url.pathname).replace(/\/$/, '') || '/';
+const isLanding = current === '/';
 
 const isActive = (href: string) => {
   const h = href.replace(/\/$/, '') || '/';
@@ -15,16 +16,27 @@ const isActive = (href: string) => {
 ---
 
 <header class="reference-header">
+  <div class="flex min-w-0 flex-wrap items-center gap-gutter-lg">
+  {!isLanding && <a href={url('/')} class="display text-title-lg text-fg" aria-label={`${profile.name} — home`}>{profile.name}</a>}
   <nav aria-label="Primary" class="reference-nav">
     {[
-      { label: 'Introduction', href: '/' },
+      { label: isLanding ? 'Home' : 'Introduction', href: '/' },
+      { label: 'About Me', href: '/about' },
       { label: 'Resume', href: '/resume' },
-      { label: 'Work', href: '/work' },
+      { label: isLanding ? 'Portfolio' : 'Work', href: '/work' },
     ].map((item) => (
-      <a href={url(item.href)} aria-current={isActive(item.href) || (item.href === '/' && current === '/about') ? 'page' : undefined}>{item.label}</a>
+      <a href={url(item.href)} aria-current={isActive(item.href) ? 'page' : undefined}>{item.label}</a>
     ))}
   </nav>
+  </div>
+  {isLanding ? (
+    <a href={url('/')} class="reference-reel" aria-label={`${profile.name} — home`}>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m3 10 9-7 9 7v10H3Z" /><path d="M9 20v-7h6v7" /></svg>
+      {profile.name}
+    </a>
+  ) : (
   <a href={profile.socials.find((s) => s.platform === 'artstation')?.url ?? url('/work')} class="reference-reel" target="_blank" rel="noopener">
     View Reel <Icon name="arrow-up-right" size={16} />
   </a>
+  )}
 </header>
