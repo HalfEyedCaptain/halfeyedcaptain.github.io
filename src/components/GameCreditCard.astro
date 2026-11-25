@@ -1,0 +1,78 @@
+---
+/**
+ * Shipped game credit. Contributions are shown exactly as entered — nothing is
+ * inferred. A rights notice clarifies that game IP belongs to its owners.
+ */
+import ArtImage from './ArtImage.astro';
+import Icon from './Icon.astro';
+import PlaceholderBadge from './PlaceholderBadge.astro';
+import type { Game } from '@/lib/content';
+import { getProjects } from '@/lib/content';
+import { url } from '@/lib/site';
+
+interface Props {
+  game: Game;
+  variant?: 'full' | 'compact';
+}
+const { game, variant = 'full' } = Astro.props;
+const d = game.data;
+
+let related: { slug: string; title: string }[] = [];
+if (variant === 'full' && d.relatedProjects.length) {
+  const projects = await getProjects();
+  const ids = new Set(d.relatedProjects);
+  related = projects.filter((p) => ids.has(p.id) || ids.has(p.slug)).map((p) => ({ slug: p.slug, title: p.data.title }));
+}
+---
+
+<article id={game.id} class:list={['group scroll-mt-28', variant === 'full' ? 'grid gap-6 sm:grid-cols-[minmax(0,13rem)_1fr] md:gap-10' : '']} data-reveal>
+  <div class="relative">
+    <ArtImage src={d.cover?.src} alt={d.cover?.alt || `${d.title} cover art`} aspect="3 / 4" widths={[300, 480, 720]} sizes="(min-width: 640px) 13rem, 60vw" />
+    <PlaceholderBadge show={d.placeholder} class="absolute top-3 left-3" />
+  </div>
+
+  <div class:list={[variant === 'compact' && 'mt-4']}>
+    <p class="label flex flex-wrap gap-x-3">
+      {d.year && <span>{d.year}</span>}
+      {d.platforms.length > 0 && <span>{d.platforms.join(' · ')}</span>}
+    </p>
+    <h3 class:list={['display mt-2 leading-tight', variant === 'full' ? 'text-display-sm' : 'text-xl']}>{d.title}</h3>
+    {
+      (d.studio || d.publisher) && (
+        <p class="mt-2 text-sm text-bone-300">
+          {d.studio}
+          {d.studio && d.publisher && d.publisher !== d.studio && <span class="text-bone-500"> / </span>}
+          {d.publisher && d.publisher !== d.studio && d.publisher}
+        </p>
+      )
+    }
+    {d.role && <p class="mt-3 font-mono text-xs tracking-[0.12em] text-copper-400 uppercase">{d.role}</p>}
+
+    {
+      variant === 'full' && (
+        <>
+          {d.contributions.length > 0 && (
+            <ul class="prose-art mt-5 !text-base">
+              {d.contributions.map((c) => (
+                <li>{c}</li>
+              ))}
+            </ul>
+          )}
+          {d.creditNote && <p class="mt-4 text-sm text-bone-500 italic">{d.creditNote}</p>}
+          <div class="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
+            {d.website && (
+              <a href={d.website} class="btn btn-ghost !px-0" target="_blank" rel="noopener">
+                Official website <Icon name="arrow-up-right" size={14} />
+              </a>
+            )}
+            {related.map((p) => (
+              <a href={url(`/portfolio/${p.slug}`)} class="btn btn-ghost !px-0">
+                {p.title} <Icon name="arrow-right" size={14} />
+              </a>
+            ))}
+          </div>
+        </>
+      )
+    }
+  </div>
+</article>

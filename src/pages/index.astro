@@ -1,0 +1,150 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Hero from '@/components/Hero.astro';
+import SectionHeading from '@/components/SectionHeading.astro';
+import ProjectCard from '@/components/ProjectCard.astro';
+import CareerStats from '@/components/CareerStats.astro';
+import GameCreditCard from '@/components/GameCreditCard.astro';
+import ExperienceTimeline from '@/components/ExperienceTimeline.astro';
+import RecognitionCard from '@/components/RecognitionCard.astro';
+import ContactBlock from '@/components/ContactBlock.astro';
+import EmptyState from '@/components/EmptyState.astro';
+import {
+  getCareerStats,
+  getExperience,
+  getGames,
+  getHome,
+  getProfile,
+  getRecognition,
+  getResumePdfPath,
+  getSelectedProjects,
+  getSkills,
+} from '@/lib/content';
+import { personLd } from '@/lib/structured-data';
+import { url } from '@/lib/site';
+
+const [home, profile, projects, stats, games, jobs, recognition, pdf, skills] = await Promise.all([
+  getHome(),
+  getProfile(),
+  getSelectedProjects(),
+  getCareerStats(),
+  getGames(),
+  getExperience(),
+  getRecognition(),
+  getResumePdfPath(),
+  getSkills(),
+]);
+
+const { hero, sections } = home;
+const featuredGames = games.filter((g) => g.data.featured).slice(0, 4);
+const featuredRecognition = recognition.filter((r) => r.data.featured).slice(0, 3);
+const isPlaceholderHero = Boolean(hero.image?.src.includes('placeholder'));
+const skillNames = skills.groups.filter((g) => !g.placeholder).flatMap((g) => g.items);
+---
+
+<BaseLayout
+  description={profile.tagline}
+  image={hero.image?.src}
+  imageAlt={hero.image?.alt}
+  type="profile"
+  overlayHeader
+  jsonLd={personLd(profile, Astro.site, { jobs, skills: skillNames })}
+>
+  <Hero
+    image={hero.image}
+    eyebrow={hero.eyebrow}
+    heading={hero.heading ?? profile.name}
+    subheading={hero.subheading ?? profile.title}
+    intro={hero.intro ?? profile.tagline}
+    focus={hero.focus}
+    pdfHref={pdf}
+    isPlaceholderImage={isPlaceholderHero}
+  />
+
+  {
+    sections.selectedWork && (
+      <section class="container-page mt-24 md:mt-36" aria-labelledby="selected-work">
+        <SectionHeading
+          id="selected-work"
+          label="01 — Portfolio"
+          title={home.selectedWork.title ?? 'Selected work'}
+          intro={home.selectedWork.intro}
+          link={{ href: '/portfolio', text: 'All projects' }}
+        />
+        {projects.length ? (
+          <div class="mt-12 grid gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
+            {projects.map((p, i) => (
+              <div data-reveal style={`transition-delay:${(i % 3) * 80}ms`}>
+                <ProjectCard project={p} />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <EmptyState class="mt-12" title="Projects are on their way" message="New character work will appear here soon." />
+        )}
+      </section>
+    )
+  }
+
+  {
+    sections.stats && (
+      <section class="container-page mt-28 md:mt-40" aria-label="Career at a glance">
+        <CareerStats stats={stats} />
+      </section>
+    )
+  }
+
+  {
+    sections.games && featuredGames.length > 0 && (
+      <section class="container-page mt-28 md:mt-40" aria-labelledby="shipped">
+        <SectionHeading id="shipped" label="02 — Credits" title="Shipped titles" link={{ href: '/games', text: 'All game credits' }} />
+        <div class="mt-12 grid grid-cols-2 gap-x-6 gap-y-12 md:grid-cols-4">
+          {featuredGames.map((g) => (
+            <a href={url(`/games#${g.id}`)} class="block hover:[&_h3]:text-copper-300">
+              <GameCreditCard game={g} variant="compact" />
+            </a>
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  {
+    sections.experience && jobs.length > 0 && (
+      <section class="container-page mt-28 md:mt-40" aria-labelledby="experience">
+        <div class="grid gap-12 lg:grid-cols-[1fr_2fr] lg:gap-20">
+          <div class="lg:sticky lg:top-28 lg:self-start">
+            <SectionHeading id="experience" label="03 — Experience" title="Professional experience" />
+          </div>
+          <div>
+            <ExperienceTimeline jobs={jobs} variant="compact" limit={3} />
+            <a href={url('/resume')} class="btn btn-outline mt-12">
+              Full résumé
+            </a>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    sections.recognition && featuredRecognition.length > 0 && (
+      <section class="container-page mt-28 md:mt-40" aria-labelledby="recognition">
+        <SectionHeading id="recognition" label="04 — Recognition" title="Industry recognition" />
+        <div class="mt-12 grid gap-10 md:grid-cols-3">
+          {featuredRecognition.map((r) => (
+            <RecognitionCard item={r} />
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  {
+    sections.contact && (
+      <section id="contact" class="container-page mt-28 md:mt-40" aria-label="Contact">
+        <ContactBlock heading={home.contactHeading} text={home.contactText} />
+      </section>
+    )
+  }
+</BaseLayout>

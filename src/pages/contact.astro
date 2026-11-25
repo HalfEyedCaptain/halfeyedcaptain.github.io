@@ -1,0 +1,13 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import ContactBlock from '@/components/ContactBlock.astro';
+import { getHome, getProfile } from '@/lib/content';
+
+const [profile, home] = await Promise.all([getProfile(), getHome()]);
+---
+
+<BaseLayout title="Contact" description={`Contact ${profile.name}, ${profile.title} — for studio roles, freelance and collaborations.`}>
+  <section class="container-page pt-12 md:pt-20">
+    <ContactBlock heading={home.contactHeading ?? 'Get in touch'} text={home.contactText} headingLevel="h1" />
+  </section>
+</BaseLayout>

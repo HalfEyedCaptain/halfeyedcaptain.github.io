@@ -1,0 +1,60 @@
+---
+/**
+ * Decorative topology lines — a softly warped quad mesh, generated at build
+ * time (no JS, no image request). Used sparingly as a quiet nod to sculpting
+ * wireframes; never placed over artwork.
+ */
+interface Props {
+  class?: string;
+  cols?: number;
+  rows?: number;
+  /** 0–1 strength of the bulge. */
+  warp?: number;
+  opacity?: number;
+}
+
+const { class: className, cols = 16, rows = 10, warp = 0.35, opacity = 0.18 } = Astro.props;
+const W = 1600;
+const H = 1000;
+const cx = W * 0.62;
+const cy = H * 0.45;
+
+function bend(x: number, y: number): [number, number] {
+  const dx = (x - cx) / W;
+  const dy = (y - cy) / H;
+  const f = Math.max(0, 1 - Math.hypot(dx, dy) * 1.5);
+  const k = f * f * warp;
+  return [x + dx * k * W * 0.6, y + dy * k * H * 0.6];
+}
+
+const paths: string[] = [];
+const steps = 48;
+for (let c = 0; c <= cols; c++) {
+  let d = '';
+  for (let s = 0; s <= steps; s++) {
+    const [x, y] = bend((W / cols) * c, (H / steps) * s);
+    d += `${s ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`;
+  }
+  paths.push(d);
+}
+for (let r = 0; r <= rows; r++) {
+  let d = '';
+  for (let s = 0; s <= steps; s++) {
+    const [x, y] = bend((W / steps) * s, (H / rows) * r);
+    d += `${s ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`;
+  }
+  paths.push(d);
+}
+---
+
+<svg
+  class:list={['pointer-events-none select-none', className]}
+  viewBox={`0 0 ${W} ${H}`}
+  preserveAspectRatio="xMidYMid slice"
+  aria-hidden="true"
+  focusable="false"
+>
+  <g fill="none" stroke="currentColor" stroke-width="1" vector-effect="non-scaling-stroke" opacity={opacity}>
+    {paths.map((d) => <path d={d} vector-effect="non-scaling-stroke" />)}
+  </g>
+</svg>

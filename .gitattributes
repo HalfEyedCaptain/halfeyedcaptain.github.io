@@ -1,0 +1,13 @@
+# Normalise line endings so Windows edits and Pages CMS commits stay consistent.
+* text=auto eol=lf
+
+# Binary assets
+*.jpg  binary
+*.jpeg binary
+*.png  binary
+*.webp binary
+*.avif binary
+*.gif  binary
+*.glb  binary
+*.pdf  binary
+*.woff2 binary

@@ -1,0 +1,97 @@
+# Builds, validates and deploys the site to GitHub Pages.
+#
+# Runs on every push to `main` (including commits made by Pages CMS),
+# on manual dispatch, and monthly so that "years of experience" stays current.
+#
+# One-time setup: Repository → Settings → Pages → Build and deployment →
+# Source: "GitHub Actions".
+
+name: Build & deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    # 06:00 UTC on the 1st of every month — refreshes computed career statistics.
+    - cron: '0 6 1 * *'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never cancel an in-progress production deployment; queue the next one instead.
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Validate & build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Detect GitHub Pages URL and base path
+        id: pages
+        uses: actions/configure-pages@v6
+        # On pull requests Pages may not be configurable; fall back to defaults.
+        continue-on-error: true
+
+      - name: Install dependencies (from lockfile)
+        run: npm ci
+
+      - name: Validate content schemas & type-check
+        run: npm run check
+
+      - name: Unit tests (experience calculation)
+        run: npm test
+
+      - name: Build website
+        run: npm run build
+        env:
+          SITE_URL: ${{ steps.pages.outputs.origin }}
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}
+
+      - name: Generate résumé PDF
+        run: |
+          npm run pdf || {
+            echo "::warning::System Chrome not usable — installing Playwright Chromium and retrying."
+            npx playwright-core install --with-deps chromium
+            npm run pdf
+          }
+        env:
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}
+
+      - name: Add .nojekyll
+        run: touch dist/.nojekyll
+
+      - name: Upload Pages artifact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+
+  deploy:
+    name: Deploy to GitHub Pages
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v5

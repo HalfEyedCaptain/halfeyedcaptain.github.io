@@ -1,0 +1,44 @@
+---
+/** Headline career numbers, all computed from content (never typed in by hand). */
+import PlaceholderBadge from './PlaceholderBadge.astro';
+import type { CareerStats } from '@/lib/content';
+import { formatDuration } from '@/lib/experience';
+
+interface Props {
+  stats: CareerStats;
+}
+const { stats } = Astro.props;
+
+const items = [
+  stats.months >= 12
+    ? { value: `${stats.years}+`, label: stats.years === 1 ? 'Year in industry' : 'Years in industry', note: formatDuration(stats.months) }
+    : stats.months > 0
+      ? { value: String(stats.months), label: 'Months in industry', note: '' }
+      : undefined,
+  stats.shippedTitles ? { value: String(stats.shippedTitles), label: stats.shippedTitles === 1 ? 'Shipped title' : 'Shipped titles', note: '' } : undefined,
+  stats.studios ? { value: String(stats.studios), label: stats.studios === 1 ? 'Studio' : 'Studios', note: '' } : undefined,
+  stats.projects ? { value: String(stats.projects), label: 'Portfolio projects', note: '' } : undefined,
+].filter((x) => x !== undefined);
+---
+
+{
+  items.length > 0 && (
+    <div>
+      {stats.fromPlaceholders && (
+        <p class="mb-6 flex items-center gap-3 text-sm text-bone-500">
+          <PlaceholderBadge text="Placeholder data" />
+          Figures are calculated automatically from résumé entries.
+        </p>
+      )}
+      <dl class="grid grid-cols-2 border-t border-l border-ink-700 lg:grid-cols-4">
+        {items.map((s) => (
+          <div class="border-r border-b border-ink-700 p-6 md:p-8" data-reveal>
+            <dt class="label">{s.label}</dt>
+            <dd class="display mt-3 text-display-lg text-bone-50">{s.value}</dd>
+            {s.note && <dd class="label mt-2">{s.note}</dd>}
+          </div>
+        ))}
+      </dl>
+    </div>
+  )
+}

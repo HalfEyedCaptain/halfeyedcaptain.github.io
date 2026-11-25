@@ -1,0 +1,39 @@
+---
+/** Section heading: mono index label + display title + optional intro and action link. */
+import Icon from './Icon.astro';
+import { url } from '@/lib/site';
+
+interface Props {
+  title: string;
+  label?: string | undefined;
+  intro?: string | undefined;
+  link?: { href: string; text: string } | undefined;
+  as?: 'h1' | 'h2' | 'h3';
+  id?: string;
+  class?: string;
+}
+const { title, label, intro, link, as: Tag = 'h2', id, class: className } = Astro.props;
+---
+
+<header class:list={['flex flex-col gap-6 md:flex-row md:items-end md:justify-between', className]}>
+  <div class="max-w-3xl">
+    {
+      label && (
+        <p class="label mb-4 flex items-center gap-3">
+          <span class="inline-block h-px w-8 bg-copper-500" aria-hidden="true" />
+          {label}
+        </p>
+      )
+    }
+    <Tag id={id} class="display text-display-md">{title}</Tag>
+    {intro && <p class="mt-5 max-w-2xl text-bone-300">{intro}</p>}
+  </div>
+  {
+    link && (
+      <a href={url(link.href)} class="btn btn-ghost shrink-0 self-start md:self-auto">
+        {link.text}
+        <Icon name="arrow-right" size={16} />
+      </a>
+    )
+  }
+</header>

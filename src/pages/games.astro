@@ -1,0 +1,37 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import EmptyState from '@/components/EmptyState.astro';
+import GameCreditCard from '@/components/GameCreditCard.astro';
+import { getGames, getProfile, getSettings } from '@/lib/content';
+
+const [games, profile, settings] = await Promise.all([getGames(), getProfile(), getSettings()]);
+---
+
+<BaseLayout title="Game Credits" description={`Shipped game titles and production credits of ${profile.name}, ${profile.title}.`}>
+  <section class="container-page pt-12 md:pt-20">
+    <p class="label mb-4 flex items-center gap-3">
+      <span class="inline-block h-px w-8 bg-copper-500" aria-hidden="true"></span>Game credits
+    </p>
+    <h1 class="display text-display-lg max-w-4xl">Shipped titles</h1>
+    <p class="mt-6 max-w-2xl text-bone-300">
+      Games I have contributed to as a character artist. Contributions describe my individual role on each production.
+    </p>
+  </section>
+
+  <section class="container-page mt-16" aria-label="Game credits">
+    {
+      games.length ? (
+        <div class="divide-y divide-ink-700 border-t border-ink-700">
+          {games.map((g) => (
+            <div class="py-12 first:pt-12">
+              <GameCreditCard game={g} />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <EmptyState title="Game credits coming soon" message="Shipped titles will be listed here." />
+      )
+    }
+    {settings.rightsNotice && <p class="mt-16 max-w-3xl text-xs text-bone-500">{settings.rightsNotice}</p>}
+  </section>
+</BaseLayout>

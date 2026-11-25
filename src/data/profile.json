@@ -1,0 +1,23 @@
+{
+  "name": "Parth Dhulia",
+  "title": "Character Artist & ZBrush Digital Sculptor",
+  "tagline": "Characters sculpted with anatomy, form and story in mind — from first blockout to game-ready asset.",
+  "summary": "[Placeholder] Character artist specialising in ZBrush digital sculpting and game character production. Replace this professional summary with 2–4 sentences describing years of experience, studios, shipped titles and core strengths — it appears at the top of the résumé.",
+  "bio": "[Placeholder] Parth Dhulia is a character artist specialising in digital sculpting with ZBrush.\n\nReplace this biography in the CMS (Profile → Biography). Describe your background, how you came to character art, the studios and productions you have contributed to, and what drives your work. Separate paragraphs with a blank line.",
+  "location": "",
+  "email": "",
+  "phone": "",
+  "availability": {
+    "status": "hidden",
+    "message": ""
+  },
+  "employmentPreferences": [],
+  "languages": [],
+  "socials": [
+    {
+      "platform": "artstation",
+      "label": "ArtStation",
+      "url": "https://www.artstation.com/parthdhulia"
+    }
+  ]
+}

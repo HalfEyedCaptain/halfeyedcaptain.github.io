@@ -1,0 +1,33 @@
+{
+  "siteTitle": "Parth Dhulia — Character Artist",
+  "description": "Portfolio and résumé of Parth Dhulia, character artist and ZBrush digital sculptor creating characters for games.",
+  "keywords": [
+    "Parth Dhulia",
+    "Parth Dhulia Character Artist",
+    "Parth Dhulia ZBrush Artist",
+    "Parth Dhulia Portfolio",
+    "Character Artist",
+    "ZBrush",
+    "Digital Sculpting",
+    "Game Character Art"
+  ],
+  "locale": "en",
+  "ogImage": {
+    "image": "/src/assets/images/placeholder-hero.jpg",
+    "alt": "Parth Dhulia — Character Artist"
+  },
+  "hidePlaceholders": false,
+  "resume": {
+    "pdfEnabled": true,
+    "pdfFileName": "Parth-Dhulia-Resume.pdf",
+    "customPdf": "",
+    "showPhone": false,
+    "showEmail": true
+  },
+  "cms": {
+    "url": "https://app.pagescms.org/HalfEyedCaptain/parthdhulia.github.io/main",
+    "showAdminLink": true
+  },
+  "footerNote": "",
+  "rightsNotice": "All artwork © Parth Dhulia unless otherwise stated. Game titles, logos and related artwork are trademarks and property of their respective owners."
+}

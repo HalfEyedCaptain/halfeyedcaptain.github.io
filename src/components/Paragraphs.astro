@@ -1,0 +1,29 @@
+---
+/** Renders plain multi-line CMS text as paragraphs (blank line = new paragraph). */
+interface Props {
+  text: string | undefined;
+  class?: string;
+}
+const { text, class: className } = Astro.props;
+const paras = (text ?? '')
+  .split(/\n\s*\n/)
+  .map((p) => p.trim())
+  .filter(Boolean);
+---
+
+{
+  paras.length > 0 && (
+    <div class:list={['space-y-[1.1em]', className]}>
+      {paras.map((p) => (
+        <p>
+          {p.split('\n').map((line, i, arr) => (
+            <>
+              {line}
+              {i < arr.length - 1 && <br />}
+            </>
+          ))}
+        </p>
+      ))}
+    </div>
+  )
+}

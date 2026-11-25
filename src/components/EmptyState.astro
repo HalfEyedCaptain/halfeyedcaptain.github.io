@@ -1,0 +1,21 @@
+---
+/** Friendly empty state shown when a collection has no published entries yet. */
+import Topology from './Topology.astro';
+
+interface Props {
+  title: string;
+  message?: string;
+  class?: string;
+}
+const { title, message, class: className } = Astro.props;
+---
+
+<div class:list={['relative overflow-hidden border border-dashed border-ink-600 px-6 py-16 text-center', className]}>
+  <Topology class="absolute inset-0 h-full w-full text-copper-500" opacity={0.12} />
+  <div class="relative">
+    <p class="label mb-3">Nothing here yet</p>
+    <p class="display text-display-sm">{title}</p>
+    {message && <p class="mx-auto mt-3 max-w-md text-sm text-bone-500">{message}</p>}
+    <slot />
+  </div>
+</div>

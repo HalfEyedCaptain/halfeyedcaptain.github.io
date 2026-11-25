@@ -1,0 +1,100 @@
+---
+/**
+ * Artwork image.
+ * - Repository images → optimised WebP with responsive srcset & intrinsic size.
+ * - External URLs     → rendered as-is (lazy loaded).
+ * - Missing / empty   → a labelled empty well instead of a broken image.
+ * The wrapper always reserves space (aspect-ratio) to avoid layout shift.
+ */
+import { Image } from 'astro:assets';
+import { resolveImage } from '@/lib/images';
+
+interface Props {
+  src: string | undefined | null;
+  alt: string;
+  /** Candidate widths for srcset. Widths larger than the original are dropped. */
+  widths?: number[];
+  sizes?: string;
+  /** Force a crop aspect ratio, e.g. "4 / 5". Defaults to the image's natural ratio. */
+  aspect?: string;
+  fit?: 'cover' | 'contain';
+  position?: string;
+  loading?: 'lazy' | 'eager';
+  priority?: boolean;
+  quality?: number;
+  /** Cap the displayed height (e.g. "88svh") while preserving the aspect ratio; the image is centred. */
+  maxHeight?: string;
+  class?: string;
+  imgClass?: string;
+}
+
+const {
+  src,
+  alt,
+  widths = [480, 800, 1200, 1600],
+  sizes = '100vw',
+  aspect,
+  fit = 'cover',
+  position = 'center',
+  loading = 'lazy',
+  priority = false,
+  quality = 80,
+  maxHeight,
+  class: className,
+  imgClass,
+} = Astro.props;
+
+const resolved = resolveImage(src);
+const natural = resolved?.kind === 'local' ? `${resolved.meta.width} / ${resolved.meta.height}` : undefined;
+const ratio = aspect ?? natural ?? '4 / 5';
+const usableWidths =
+  resolved?.kind === 'local'
+    ? [...new Set([...widths.filter((w) => w < resolved.meta.width), Math.min(resolved.meta.width, Math.max(...widths))])].sort((a, b) => a - b)
+    : [];
+let style = `aspect-ratio: ${ratio};`;
+if (maxHeight && resolved?.kind === 'local' && !aspect) {
+  // width = min(container, maxHeight × w/h) keeps tall portraits within the viewport.
+  style += ` width: min(100%, calc(${maxHeight} * ${resolved.meta.width} / ${resolved.meta.height})); margin-inline: auto;`;
+}
+const imgStyle = `object-fit: ${fit}; object-position: ${position};`;
+---
+
+<div class:list={['art-well', className]} style={style}>
+  {
+    resolved?.kind === 'local' && (
+      <Image
+        src={resolved.meta}
+        alt={alt}
+        widths={usableWidths}
+        sizes={sizes}
+        format="webp"
+        quality={quality}
+        loading={priority ? 'eager' : loading}
+        fetchpriority={priority ? 'high' : 'auto'}
+        decoding="async"
+        class={imgClass}
+        style={imgStyle}
+      />
+    )
+  }
+  {
+    resolved?.kind === 'remote' && (
+      <img
+        src={resolved.src}
+        alt={alt}
+        loading={priority ? 'eager' : loading}
+        decoding="async"
+        class={imgClass}
+        style={imgStyle}
+        referrerpolicy="no-referrer"
+      />
+    )
+  }
+  {
+    (!resolved || resolved.kind === 'missing') && (
+      <div class="absolute inset-0 flex items-center justify-center p-4 text-center" role="img" aria-label={alt || 'Image unavailable'}>
+        <span class="label">{resolved ? 'Image unavailable' : 'No image yet'}</span>
+      </div>
+    )
+  }
+</div>

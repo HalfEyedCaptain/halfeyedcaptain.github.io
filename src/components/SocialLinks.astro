@@ -1,0 +1,76 @@
+---
+/** Social / portfolio links from the profile. `icons` = compact row; `list` = labelled rows. */
+import Icon, { type IconName } from './Icon.astro';
+import { getProfile } from '@/lib/content';
+
+interface Props {
+  variant?: 'icons' | 'list';
+  class?: string;
+  includeEmail?: boolean;
+}
+const { variant = 'icons', class: className, includeEmail = false } = Astro.props;
+const profile = await getProfile();
+
+const NAMES: Record<string, string> = {
+  artstation: 'ArtStation',
+  linkedin: 'LinkedIn',
+  github: 'GitHub',
+  instagram: 'Instagram',
+  x: 'X',
+  youtube: 'YouTube',
+  vimeo: 'Vimeo',
+  sketchfab: 'Sketchfab',
+  behance: 'Behance',
+  website: 'Website',
+  other: 'Link',
+};
+
+const links = profile.socials.map((s) => ({
+  href: s.url,
+  label: s.label ?? NAMES[s.platform] ?? 'Link',
+  icon: s.platform as IconName,
+  display: s.url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, ''),
+}));
+if (includeEmail && profile.email) {
+  links.unshift({ href: `mailto:${profile.email}`, label: 'Email', icon: 'mail', display: profile.email });
+}
+---
+
+{
+  links.length > 0 &&
+    (variant === 'icons' ? (
+      <ul class:list={['flex flex-wrap items-center gap-1', className]}>
+        {links.map((l) => (
+          <li>
+            <a
+              href={l.href}
+              class="inline-flex h-10 w-10 items-center justify-center text-bone-300 transition-colors hover:text-copper-400"
+              rel="me noopener"
+              target={l.href.startsWith('mailto:') ? undefined : '_blank'}
+            >
+              <Icon name={l.icon} size={18} />
+              <span class="sr-only">{l.label}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <ul class:list={['divide-y divide-ink-700 border-y border-ink-700', className]}>
+        {links.map((l) => (
+          <li>
+            <a
+              href={l.href}
+              class="group flex items-center gap-4 py-4 transition-colors hover:text-copper-400"
+              rel="me noopener"
+              target={l.href.startsWith('mailto:') ? undefined : '_blank'}
+            >
+              <Icon name={l.icon} size={18} class="text-bone-500 group-hover:text-copper-400" />
+              <span class="label w-28 shrink-0 group-hover:text-copper-400">{l.label}</span>
+              <span class="min-w-0 flex-1 truncate text-bone-100">{l.display}</span>
+              <Icon name="arrow-up-right" size={16} class="text-bone-500 group-hover:text-copper-400" />
+            </a>
+          </li>
+        ))}
+      </ul>
+    ))
+}

@@ -1,0 +1,20 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Topology from '@/components/Topology.astro';
+import { url } from '@/lib/site';
+---
+
+<BaseLayout title="Page not found" noindex>
+  <section class="relative overflow-hidden">
+    <Topology class="absolute inset-0 h-full w-full text-copper-500" opacity={0.14} warp={0.6} />
+    <div class="container-page relative flex min-h-[70svh] flex-col items-start justify-center py-24">
+      <p class="label">Error 404</p>
+      <h1 class="display mt-4 text-display-xl">Lost in the mesh.</h1>
+      <p class="mt-6 max-w-lg text-bone-300">This page doesn't exist or has moved. Try the portfolio instead.</p>
+      <div class="mt-10 flex flex-wrap gap-3">
+        <a href={url('/portfolio')} class="btn btn-primary">View portfolio</a>
+        <a href={url('/')} class="btn btn-outline">Home</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

@@ -1,0 +1,16 @@
+---
+/** Résumé section: a two-column row on screen, a compact block in print. */
+interface Props {
+  title: string;
+  id?: string;
+  class?: string;
+}
+const { title, id, class: className } = Astro.props;
+---
+
+<section class:list={['resume-section grid gap-4 border-t border-ink-700 py-10 md:grid-cols-[13rem_1fr] md:gap-10', className]} aria-labelledby={id}>
+  <h2 id={id} class="label pt-1 text-copper-400">{title}</h2>
+  <div class="min-w-0">
+    <slot />
+  </div>
+</section>

@@ -1,0 +1,17 @@
+---
+/** Visible marker for seed/placeholder content that must be replaced via the CMS. */
+interface Props {
+  show?: boolean | undefined;
+  class?: string;
+  text?: string;
+}
+const { show = true, class: className, text = 'Placeholder' } = Astro.props;
+---
+
+{
+  show && (
+    <span class:list={['placeholder-badge', className]} title="Placeholder content — replace this in the CMS">
+      {text}
+    </span>
+  )
+}

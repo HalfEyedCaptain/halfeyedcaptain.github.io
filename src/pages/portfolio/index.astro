@@ -1,0 +1,198 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import ProjectCard from '@/components/ProjectCard.astro';
+import Lightbox from '@/components/Lightbox.astro';
+import EmptyState from '@/components/EmptyState.astro';
+import { getProfile, getProjects, getUsedCategories } from '@/lib/content';
+
+const [projects, profile] = await Promise.all([getProjects(), getProfile()]);
+const categories = await getUsedCategories(projects);
+const hasFeatured = projects.some((p) => p.data.featured);
+const hasPersonal = projects.some((p) => p.data.classification === 'personal');
+const hasProfessional = projects.some((p) => p.data.classification === 'professional');
+---
+
+<BaseLayout
+  title="Portfolio"
+  description={`Character art portfolio of ${profile.name}: realistic and stylised characters, ZBrush digital sculptures and creatures.`}
+>
+  <section class="container-page pt-16 md:pt-24">
+    <p class="label mb-4 flex items-center gap-3">
+      <span class="inline-block h-px w-8 bg-copper-500" aria-hidden="true"></span>Portfolio
+    </p>
+    <h1 class="display text-display-lg max-w-4xl">Characters, sculpts &amp; studies</h1>
+    <p class="mt-6 max-w-2xl text-bone-300">
+      A selection of personal and professional character work. Select any project for high-poly sculpts, topology and texture breakdowns.
+    </p>
+  </section>
+
+  {
+    projects.length === 0 ? (
+      <div class="container-page mt-16">
+        <EmptyState title="Projects are on their way" message="New character work will be published here soon." />
+      </div>
+    ) : (
+      <>
+        <div class="sticky top-(--header-h) z-30 mt-12 border-y border-ink-700 bg-ink-950/90 backdrop-blur-md" data-filters hidden>
+          <div class="container-page flex flex-col gap-3 py-3 xl:flex-row xl:items-center xl:justify-between">
+            <div class="-mx-1 flex min-w-0 gap-1 overflow-x-auto pb-1 xl:pb-0" role="group" aria-label="Filter by category">
+              <button type="button" class="chip" data-filter-category="" aria-pressed="true">
+                All
+              </button>
+              {hasFeatured && (
+                <button type="button" class="chip" data-filter-category="__featured" aria-pressed="false">
+                  Featured
+                </button>
+              )}
+              {categories.map((c) => (
+                <button type="button" class="chip" data-filter-category={c.id} aria-pressed="false" title={c.description}>
+                  {c.label}
+                </button>
+              ))}
+            </div>
+            <div class="flex flex-wrap items-center gap-3">
+              {hasPersonal && hasProfessional && (
+                <div class="flex" role="group" aria-label="Filter by type">
+                  <button type="button" class="chip" data-filter-class="" aria-pressed="true">
+                    All work
+                  </button>
+                  <button type="button" class="chip" data-filter-class="professional" aria-pressed="false">
+                    Professional
+                  </button>
+                  <button type="button" class="chip" data-filter-class="personal" aria-pressed="false">
+                    Personal
+                  </button>
+                </div>
+              )}
+              <label class="flex items-center gap-2">
+                <span class="label">Sort</span>
+                <select data-sort class="border border-ink-700 bg-ink-900 px-3 py-2 font-mono text-xs tracking-wider text-bone-100 uppercase">
+                  <option value="curated">Curated</option>
+                  <option value="newest">Newest</option>
+                  <option value="oldest">Oldest</option>
+                  <option value="title">A–Z</option>
+                </select>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <section class="container-page mt-12" aria-label="Projects">
+          <p class="label mb-8" aria-live="polite" data-count>
+            {projects.length} {projects.length === 1 ? 'project' : 'projects'}
+          </p>
+          <div class="grid gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-3" data-grid>
+            {projects.map((p, i) => (
+              <ProjectCard project={p} expandable headingLevel="h2" priority={i < 3} />
+            ))}
+          </div>
+          <div hidden data-empty>
+            <EmptyState title="No projects match these filters" message="Try another category or show all work." />
+          </div>
+        </section>
+        <Lightbox />
+      </>
+    )
+  }
+</BaseLayout>
+
+<style>
+  .chip {
+    flex-shrink: 0;
+    padding: 0.55rem 0.9rem;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-bone-300);
+    border: 1px solid transparent;
+    transition:
+      color 150ms,
+      border-color 150ms,
+      background-color 150ms;
+    white-space: nowrap;
+  }
+  .chip:hover {
+    color: var(--color-bone-50);
+  }
+  .chip[aria-pressed='true'] {
+    color: var(--color-ink-950);
+    background: var(--color-bone-100);
+  }
+</style>
+
+<script>
+  const bar = document.querySelector<HTMLElement>('[data-filters]');
+  const grid = document.querySelector<HTMLElement>('[data-grid]');
+  if (bar && grid) {
+    bar.hidden = false;
+    const cards = [...grid.querySelectorAll<HTMLElement>('[data-project]')];
+    const originalOrder = [...cards];
+    const countEl = document.querySelector<HTMLElement>('[data-count]');
+    const emptyEl = document.querySelector<HTMLElement>('[data-empty]');
+    const sortEl = bar.querySelector<HTMLSelectElement>('[data-sort]')!;
+    const catButtons = [...bar.querySelectorAll<HTMLButtonElement>('[data-filter-category]')];
+    const classButtons = [...bar.querySelectorAll<HTMLButtonElement>('[data-filter-class]')];
+
+    const params = new URLSearchParams(location.search);
+    const state = {
+      category: params.get('category') ?? '',
+      kind: params.get('type') ?? '',
+      sort: params.get('sort') ?? 'curated',
+    };
+    if (!catButtons.some((b) => b.dataset.filterCategory === state.category)) state.category = '';
+    if (!['curated', 'newest', 'oldest', 'title'].includes(state.sort)) state.sort = 'curated';
+
+    const apply = () => {
+      catButtons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.filterCategory === state.category)));
+      classButtons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.filterClass === state.kind)));
+      sortEl.value = state.sort;
+
+      let visible = 0;
+      for (const card of cards) {
+        const catOk =
+          !state.category ||
+          (state.category === '__featured' ? card.dataset.featured === 'true' : card.dataset.category === state.category);
+        const kindOk = !state.kind || card.dataset.classification === state.kind;
+        const show = catOk && kindOk;
+        card.hidden = !show;
+        if (show) visible++;
+      }
+
+      const sorted = [...originalOrder];
+      const num = (el: HTMLElement, k: string) => Number(el.dataset[k] ?? 0);
+      if (state.sort === 'newest') sorted.sort((a, b) => num(b, 'date') - num(a, 'date'));
+      if (state.sort === 'oldest') sorted.sort((a, b) => num(a, 'date') - num(b, 'date'));
+      if (state.sort === 'title') sorted.sort((a, b) => (a.dataset.title ?? '').localeCompare(b.dataset.title ?? ''));
+      grid.append(...sorted);
+
+      if (countEl) countEl.textContent = `${visible} ${visible === 1 ? 'project' : 'projects'}`;
+      if (emptyEl) emptyEl.hidden = visible > 0;
+
+      const q = new URLSearchParams();
+      if (state.category) q.set('category', state.category);
+      if (state.kind) q.set('type', state.kind);
+      if (state.sort !== 'curated') q.set('sort', state.sort);
+      const qs = q.toString();
+      history.replaceState(null, '', qs ? `?${qs}` : location.pathname);
+    };
+
+    catButtons.forEach((b) =>
+      b.addEventListener('click', () => {
+        state.category = b.dataset.filterCategory ?? '';
+        apply();
+      }),
+    );
+    classButtons.forEach((b) =>
+      b.addEventListener('click', () => {
+        state.kind = b.dataset.filterClass ?? '';
+        apply();
+      }),
+    );
+    sortEl.addEventListener('change', () => {
+      state.sort = sortEl.value;
+      apply();
+    });
+    apply();
+  }
+</script>

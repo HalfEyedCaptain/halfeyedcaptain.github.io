@@ -1,0 +1,36 @@
+---
+/** Privacy-friendly YouTube / Vimeo embed; unknown URLs degrade to a plain link. */
+import Icon from './Icon.astro';
+import { parseVideoUrl } from '@/lib/video';
+
+interface Props {
+  url: string;
+  title?: string | undefined;
+}
+const { url: videoUrl, title } = Astro.props;
+const video = parseVideoUrl(videoUrl);
+const label = title ?? 'Project video';
+---
+
+<figure>
+  {
+    video ? (
+      <div class="relative aspect-video overflow-hidden bg-ink-850">
+        <iframe
+          src={video.embedUrl}
+          title={label}
+          loading="lazy"
+          class="absolute inset-0 h-full w-full"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+          allowfullscreen
+          referrerpolicy="strict-origin-when-cross-origin"
+        />
+      </div>
+    ) : (
+      <a href={videoUrl} target="_blank" rel="noopener" class="flex aspect-video items-center justify-center gap-3 bg-ink-850 text-bone-100 hover:text-copper-400">
+        <Icon name="play" size={28} /> Watch video
+      </a>
+    )
+  }
+  {title && <figcaption class="label mt-3">{title}</figcaption>}
+</figure>

@@ -1,0 +1,39 @@
+{
+  "portrait": {
+    "image": "/src/assets/images/placeholder-portrait.jpg",
+    "alt": "Placeholder — artist photograph to be supplied"
+  },
+  "intro": "Character art, sculpted form by form.",
+  "philosophy": "[Placeholder] Describe your artistic philosophy — what you look for in a strong character, how you approach silhouette, anatomy, materials and storytelling, and what you want a player to feel when they see your work.",
+  "specialization": "[Placeholder] Describe your ZBrush specialisation — e.g. primary/secondary/tertiary form, anatomy, hard-surface integration, cloth and folds, likeness work, stylised shape language, or creature design. Mention the techniques and tools inside ZBrush you rely on most.",
+  "highlights": [
+    "[Placeholder] Career highlight — e.g. a shipped title, a notable character, a feature or award."
+  ],
+  "workflow": [
+    {
+      "title": "Reference & concept",
+      "description": "[Placeholder] How you gather reference and interpret concept art before sculpting."
+    },
+    {
+      "title": "Blockout & primary forms",
+      "description": "[Placeholder] Establishing silhouette, proportion and primary forms in ZBrush."
+    },
+    {
+      "title": "High-poly sculpt",
+      "description": "[Placeholder] Secondary and tertiary detail, anatomy, cloth and surface detail."
+    },
+    {
+      "title": "Retopology & UVs",
+      "description": "[Placeholder] Building production topology suitable for deformation and budgets."
+    },
+    {
+      "title": "Baking & texturing",
+      "description": "[Placeholder] Map baking, material definition and texture painting."
+    },
+    {
+      "title": "Presentation",
+      "description": "[Placeholder] Lighting, rendering and in-engine presentation."
+    }
+  ],
+  "interests": []
+}

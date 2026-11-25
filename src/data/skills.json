@@ -1,0 +1,28 @@
+{
+  "groups": [
+    {
+      "title": "Core specialisation",
+      "kind": "technical",
+      "items": ["Character art", "Digital sculpting", "ZBrush"],
+      "placeholder": false
+    },
+    {
+      "title": "Software toolkit",
+      "kind": "software",
+      "items": ["ZBrush", "[Placeholder] Add other software — e.g. 3D modelling, texturing, rendering and engine tools"],
+      "placeholder": true
+    },
+    {
+      "title": "Artistic competencies",
+      "kind": "artistic",
+      "items": ["[Placeholder] e.g. Anatomy", "[Placeholder] e.g. Form & silhouette", "[Placeholder] e.g. Stylised shape language"],
+      "placeholder": true
+    },
+    {
+      "title": "Leadership & collaboration",
+      "kind": "leadership",
+      "items": ["[Placeholder] e.g. Mentoring, reviews, outsourcing direction — only if applicable"],
+      "placeholder": true
+    }
+  ]
+}

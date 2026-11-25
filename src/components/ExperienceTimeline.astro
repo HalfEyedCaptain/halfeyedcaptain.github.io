@@ -1,0 +1,123 @@
+---
+/** Professional experience timeline. `compact` is used on the homepage. */
+import PlaceholderBadge from './PlaceholderBadge.astro';
+import { getGames, type Job } from '@/lib/content';
+import { formatRange } from '@/lib/dates';
+import { formatDuration, periodMonths } from '@/lib/experience';
+import { url } from '@/lib/site';
+
+interface Props {
+  jobs: Job[];
+  variant?: 'full' | 'compact';
+  limit?: number;
+}
+const { jobs, variant = 'full', limit } = Astro.props;
+const shown = limit ? jobs.slice(0, limit) : jobs;
+
+const TYPE: Record<string, string> = {
+  'full-time': 'Full-time',
+  'part-time': 'Part-time',
+  contract: 'Contract',
+  freelance: 'Freelance',
+  internship: 'Internship',
+  other: '',
+};
+
+const visibleGames = new Map((await getGames()).map((g) => [g.id, g]));
+const rows = await Promise.all(
+  shown.map(async (job) => {
+    const games = job.data.games.map((id) => visibleGames.get(id)).filter((g) => g !== undefined);
+    return {
+      job,
+      range: formatRange(job.data.start, job.data.end, job.isCurrent),
+      duration: formatDuration(periodMonths({ start: job.data.start, end: job.data.end, current: job.isCurrent })),
+      games: games.map((g) => ({ id: g.id, title: g.data.title })),
+    };
+  }),
+);
+---
+
+<ol class="relative border-l border-ink-700">
+  {
+    rows.map(({ job, range, duration, games }) => (
+      <li class="relative pb-12 pl-8 last:pb-0 md:pl-12" data-reveal>
+        <span
+          class:list={[
+            'absolute top-2 -left-[5px] h-[9px] w-[9px] rotate-45 border',
+            job.isCurrent ? 'border-copper-400 bg-copper-400' : 'border-ink-600 bg-ink-950',
+          ]}
+          aria-hidden="true"
+        />
+        <div class="grid gap-2 md:grid-cols-[12rem_1fr] md:gap-10">
+          <div>
+            <p class="label text-bone-300">{range}</p>
+            {duration && <p class="label mt-1">{duration}</p>}
+          </div>
+          <div>
+            <div class="flex flex-wrap items-center gap-3">
+              <h3 class="display text-2xl leading-tight">{job.data.role}</h3>
+              {job.isCurrent && <span class="label text-copper-400">Current</span>}
+              <PlaceholderBadge show={job.data.placeholder} />
+            </div>
+            <p class="mt-1 text-bone-300">
+              {job.data.companyUrl ? (
+                <a href={job.data.companyUrl} class="link-underline" target="_blank" rel="noopener">
+                  {job.data.company}
+                </a>
+              ) : (
+                job.data.company
+              )}
+              {job.data.location && <span class="text-bone-500"> · {job.data.location}</span>}
+              {TYPE[job.data.employmentType] && <span class="text-bone-500"> · {TYPE[job.data.employmentType]}</span>}
+            </p>
+
+            {job.data.summary && <p class="mt-4 max-w-2xl text-bone-300">{job.data.summary}</p>}
+
+            {variant === 'full' && (
+              <>
+                {job.data.responsibilities.length > 0 && (
+                  <ul class="prose-art mt-4 !max-w-2xl space-y-1 !text-base">
+                    {job.data.responsibilities.map((r) => (
+                      <li>{r}</li>
+                    ))}
+                  </ul>
+                )}
+                {job.data.achievements.length > 0 && (
+                  <div class="mt-5">
+                    <p class="label mb-2">Achievements</p>
+                    <ul class="prose-art !max-w-2xl space-y-1 !text-base">
+                      {job.data.achievements.map((r) => (
+                        <li>{r}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {job.data.leadership.length > 0 && (
+                  <div class="mt-5">
+                    <p class="label mb-2">Leadership</p>
+                    <ul class="prose-art !max-w-2xl space-y-1 !text-base">
+                      {job.data.leadership.map((r) => (
+                        <li>{r}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </>
+            )}
+
+            {games.length > 0 && (
+              <p class="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+                <span class="label">Shipped</span>
+                {games.map((g) => (
+                  <a href={url(`/games#${g.id}`)} class="text-bone-100 link-underline">
+                    {g.title}
+                  </a>
+                ))}
+              </p>
+            )}
+          </div>
+        </div>
+      </li>
+    ))
+  }
+</ol>

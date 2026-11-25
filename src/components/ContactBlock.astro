@@ -1,0 +1,79 @@
+---
+/**
+ * Contact information. There is intentionally no form: GitHub Pages has no
+ * backend, so visitors are directed to email and professional networks.
+ */
+import Icon from './Icon.astro';
+import SocialLinks from './SocialLinks.astro';
+import Topology from './Topology.astro';
+import { getProfile } from '@/lib/content';
+
+interface Props {
+  heading?: string | undefined;
+  text?: string | undefined;
+  headingLevel?: 'h1' | 'h2';
+}
+const { heading = "Let's work together", text, headingLevel: H = 'h2' } = Astro.props;
+const profile = await getProfile();
+const artstation = profile.socials.find((s) => s.platform === 'artstation');
+const primary = profile.email
+  ? { href: `mailto:${profile.email}`, label: profile.email, icon: 'mail' as const }
+  : artstation
+    ? { href: artstation.url, label: 'Message on ArtStation', icon: 'artstation' as const }
+    : undefined;
+
+const AVAIL = {
+  open: { text: 'Available for new opportunities', dot: 'bg-emerald-400' },
+  limited: { text: 'Limited availability', dot: 'bg-amber-400' },
+  unavailable: { text: 'Not currently available', dot: 'bg-bone-500' },
+  hidden: undefined,
+} as const;
+const availability = AVAIL[profile.availability.status];
+---
+
+<div class="relative overflow-hidden border border-ink-700 bg-ink-900">
+  <Topology class="absolute inset-0 h-full w-full text-copper-500" opacity={0.09} />
+  <div class="relative grid min-w-0 gap-12 p-6 sm:p-8 md:p-14 lg:grid-cols-[1.3fr_1fr] lg:gap-20">
+    <div>
+      {
+        availability && (
+          <p class="label mb-6 flex items-center gap-3 text-bone-300">
+            <span class:list={['h-2 w-2 rounded-full', availability.dot]} aria-hidden="true" />
+            {profile.availability.message ?? availability.text}
+          </p>
+        )
+      }
+      <H class="display text-display-md [overflow-wrap:anywhere] sm:text-display-lg">{heading}</H>
+      {text && <p class="mt-6 max-w-xl text-lg text-bone-300">{text}</p>}
+      {
+        primary && (
+          <a href={primary.href} class="btn btn-primary mt-10" target={primary.href.startsWith('mailto:') ? undefined : '_blank'} rel="noopener">
+            <Icon name={primary.icon} size={16} /> {primary.label}
+          </a>
+        )
+      }
+      <dl class="mt-10 grid gap-6 sm:grid-cols-2">
+        {
+          profile.location && (
+            <div>
+              <dt class="label">Location</dt>
+              <dd class="mt-2 text-bone-100">{profile.location}</dd>
+            </div>
+          )
+        }
+        {
+          profile.employmentPreferences.length > 0 && (
+            <div>
+              <dt class="label">Open to</dt>
+              <dd class="mt-2 text-bone-100">{profile.employmentPreferences.join(' · ')}</dd>
+            </div>
+          )
+        }
+      </dl>
+    </div>
+    <div class="self-end">
+      <p class="label mb-4">Find me online</p>
+      <SocialLinks variant="list" includeEmail />
+    </div>
+  </div>
+</div>

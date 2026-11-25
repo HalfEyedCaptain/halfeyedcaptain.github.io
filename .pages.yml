@@ -1,0 +1,958 @@
+# =============================================================================
+# Pages CMS configuration — https://pagescms.org
+# Open the editor at: https://app.pagescms.org  (sign in with GitHub)
+#
+# This file mirrors the validated schemas in src/content.config.ts.
+# If you add or rename a field here, update the schema there too.
+# =============================================================================
+
+media:
+  - name: artwork
+    label: Artwork
+    input: src/assets/artwork
+    output: /src/assets/artwork
+    categories: [image]
+  - name: covers
+    label: Game covers
+    input: src/assets/game-covers
+    output: /src/assets/game-covers
+    categories: [image]
+  - name: site
+    label: Site images
+    input: src/assets/images
+    output: /src/assets/images
+    categories: [image]
+  - name: models
+    label: 3D models
+    input: public/models
+    output: /models
+    extensions: [glb, gltf]
+  - name: documents
+    label: Documents
+    input: public/files
+    output: /files
+    categories: [document]
+
+components:
+  # Reusable "image + alt text" block. Either upload an image OR paste an external URL.
+  artImage:
+    type: object
+    fields:
+      - name: image
+        label: Image
+        type: image
+        options:
+          media: artwork
+      - name: url
+        label: …or external image URL
+        type: string
+        description: Optional. Use instead of an upload for very large files hosted elsewhere.
+      - name: alt
+        label: Alt text
+        type: string
+        description: Describe the image for screen readers and search engines (e.g. "Front view of the knight character, full body render").
+      - name: caption
+        label: Caption
+        type: string
+
+content:
+  # ---------------------------------------------------------------------------
+  # PORTFOLIO
+  # ---------------------------------------------------------------------------
+  - name: projects
+    label: Portfolio projects
+    type: collection
+    path: src/content/projects
+    format: yaml-frontmatter
+    filename: "{primary}.md"
+    view:
+      fields: [title, status, featured, order, completed]
+      primary: title
+      sort: [order, completed, title]
+      default:
+        sort: order
+        order: asc
+    fields:
+      - name: title
+        label: Project title
+        type: string
+        required: true
+      - name: slug
+        label: URL slug
+        type: string
+        description: "Optional. The web address of the project, e.g. 'forest-guardian' → /portfolio/forest-guardian/. Leave empty to use the file name."
+      - name: status
+        label: Status
+        type: select
+        default: draft
+        description: "Draft = hidden on the live site. Published = visible. Archived = hidden but kept."
+        options:
+          values:
+            - { name: draft, label: Draft }
+            - { name: published, label: Published }
+            - { name: archived, label: Archived }
+      - name: featured
+        label: Featured project
+        type: boolean
+        default: false
+      - name: order
+        label: Display order
+        type: number
+        default: 100
+        description: Lower numbers appear first (e.g. 10, 20, 30…).
+      - name: placeholder
+        label: Placeholder content
+        type: boolean
+        default: false
+        description: Untick once this project contains real content.
+      - name: summary
+        label: Short description
+        type: text
+        description: One or two sentences shown on cards and at the top of the project page.
+      - name: category
+        label: Category
+        type: reference
+        options:
+          collection: categories
+          search: label
+          label: "{label}"
+      - name: classification
+        label: Personal or professional
+        type: select
+        default: personal
+        options:
+          values:
+            - { name: personal, label: Personal }
+            - { name: professional, label: Professional }
+      - name: studio
+        label: Studio / client
+        type: string
+      - name: completed
+        label: Completion date
+        type: date
+        default: ""
+        options:
+          format: yyyy-MM-dd
+      - name: tags
+        label: Tags
+        type: string
+        list: true
+      - name: software
+        label: Software used
+        type: string
+        list: true
+      - name: responsibilities
+        label: Responsibilities
+        type: string
+        list: true
+      - name: thumbnail
+        label: Thumbnail (grid image)
+        component: artImage
+        description: Shown in portfolio grids. A 4:5 portrait crop works best.
+      - name: hero
+        label: Hero artwork
+        component: artImage
+        description: Large image at the top of the project page.
+      - name: renders
+        label: Final renders
+        component: artImage
+        list: { collapsible: { collapsed: true, summary: "{caption}{alt}" } }
+      - name: gallery
+        label: Additional images
+        component: artImage
+        list: { collapsible: { collapsed: true, summary: "{caption}{alt}" } }
+      - name: sculpts
+        label: High-poly sculpt images
+        component: artImage
+        list: { collapsible: { collapsed: true, summary: "{caption}{alt}" } }
+      - name: topology
+        label: Wireframe & topology images
+        component: artImage
+        list: { collapsible: { collapsed: true, summary: "{caption}{alt}" } }
+      - name: textures
+        label: Texture breakdown images
+        component: artImage
+        list: { collapsible: { collapsed: true, summary: "{caption}{alt}" } }
+      - name: videos
+        label: Videos (YouTube / Vimeo)
+        type: object
+        list: true
+        fields:
+          - name: url
+            label: Video URL
+            type: string
+          - name: title
+            label: Title
+            type: string
+      - name: model
+        label: Interactive 3D model (optional)
+        type: object
+        fields:
+          - name: file
+            label: GLB / glTF file
+            type: file
+            options:
+              media: models
+          - name: url
+            label: …or external model URL
+            type: string
+            description: Recommended for files larger than ~20 MB.
+          - name: poster
+            label: Poster image
+            type: image
+            options:
+              media: artwork
+          - name: alt
+            label: Model description
+            type: string
+          - name: autoRotate
+            label: Auto-rotate
+            type: boolean
+            default: true
+      - name: artstation
+        label: ArtStation project link
+        type: string
+      - name: credits
+        label: Credits & collaborators
+        type: object
+        list: true
+        fields:
+          - name: name
+            label: Name
+            type: string
+          - name: role
+            label: Role (e.g. Concept art)
+            type: string
+          - name: url
+            label: Link
+            type: string
+      - name: copyright
+        label: Copyright / attribution
+        type: text
+      - name: relatedGame
+        label: Related game credit
+        type: reference
+        options:
+          collection: games
+          search: title
+          label: "{title}"
+      - name: body
+        label: Detailed description
+        type: rich-text
+        options:
+          format: markdown
+          media: artwork
+
+  - name: categories
+    label: Portfolio categories
+    type: collection
+    path: src/content/categories
+    format: json
+    filename: "{primary}.json"
+    view:
+      fields: [label, order]
+      primary: label
+      default:
+        sort: order
+        order: asc
+    fields:
+      - name: label
+        label: Category name
+        type: string
+        required: true
+      - name: description
+        label: Description
+        type: text
+      - name: order
+        label: Display order
+        type: number
+        default: 100
+
+  # ---------------------------------------------------------------------------
+  # RÉSUMÉ
+  # ---------------------------------------------------------------------------
+  - name: experience
+    label: "Résumé: Experience"
+    type: collection
+    path: src/content/experience
+    format: yaml-frontmatter
+    filename: "{primary}.md"
+    view:
+      fields: [role, company, start, end, current]
+      primary: role
+      sort: [start]
+      default:
+        sort: start
+        order: desc
+    fields:
+      - name: role
+        label: Job title
+        type: string
+        required: true
+      - name: company
+        label: Company / studio
+        type: string
+        required: true
+      - name: companyUrl
+        label: Company website
+        type: string
+      - name: location
+        label: Location
+        type: string
+      - name: employmentType
+        label: Employment type
+        type: select
+        default: full-time
+        options:
+          values:
+            - { name: full-time, label: Full-time }
+            - { name: part-time, label: Part-time }
+            - { name: contract, label: Contract }
+            - { name: freelance, label: Freelance }
+            - { name: internship, label: Internship }
+            - { name: other, label: Other }
+      - name: start
+        label: Start date
+        type: date
+        required: true
+        options:
+          format: yyyy-MM-dd
+      - name: end
+        label: End date
+        type: date
+        default: ""
+        description: Leave empty if this is your current job.
+        options:
+          format: yyyy-MM-dd
+      - name: current
+        label: I currently work here
+        type: boolean
+        default: false
+      - name: countTowardsExperience
+        label: Count towards total years of experience
+        type: boolean
+        default: true
+        description: Overlapping roles are never double-counted.
+      - name: summary
+        label: One-line summary
+        type: text
+      - name: responsibilities
+        label: Responsibilities
+        type: string
+        list: true
+      - name: achievements
+        label: Achievements
+        type: string
+        list: true
+      - name: leadership
+        label: Leadership (mentoring, reviews, team lead…)
+        type: string
+        list: true
+      - name: games
+        label: Games shipped in this role
+        type: reference
+        options:
+          collection: games
+          multiple: true
+          search: title
+          label: "{title}"
+      - name: status
+        label: Status
+        type: select
+        default: published
+        options:
+          values:
+            - { name: published, label: Published }
+            - { name: draft, label: Draft }
+            - { name: archived, label: Archived }
+      - name: placeholder
+        label: Placeholder content
+        type: boolean
+        default: false
+
+  - name: games
+    label: "Résumé: Game credits"
+    type: collection
+    path: src/content/games
+    format: yaml-frontmatter
+    filename: "{primary}.md"
+    view:
+      fields: [title, year, role, featured]
+      primary: title
+      sort: [order, year, title]
+      default:
+        sort: order
+        order: asc
+    fields:
+      - name: title
+        label: Game title
+        type: string
+        required: true
+      - name: cover
+        label: Cover artwork
+        type: object
+        fields:
+          - name: image
+            label: Image
+            type: image
+            options:
+              media: covers
+          - name: url
+            label: …or external image URL
+            type: string
+          - name: alt
+            label: Alt text
+            type: string
+      - name: studio
+        label: Developer / studio
+        type: string
+      - name: publisher
+        label: Publisher
+        type: string
+      - name: year
+        label: Release year
+        type: number
+      - name: platforms
+        label: Platforms
+        type: string
+        list: true
+      - name: role
+        label: Your role
+        type: string
+      - name: contributions
+        label: Your contributions
+        type: string
+        list: true
+        description: Only list confirmed contributions that you are allowed to disclose.
+      - name: creditNote
+        label: Credit note
+        type: text
+        description: Optional — e.g. "Credited as Character Artist (outsourced via X)".
+      - name: website
+        label: Official game website
+        type: string
+      - name: relatedProjects
+        label: Related portfolio projects
+        type: reference
+        options:
+          collection: projects
+          multiple: true
+          search: title
+          label: "{title}"
+      - name: featured
+        label: Show on homepage
+        type: boolean
+        default: true
+      - name: order
+        label: Display order
+        type: number
+        default: 100
+      - name: status
+        label: Status
+        type: select
+        default: published
+        options:
+          values:
+            - { name: published, label: Published }
+            - { name: draft, label: Draft }
+            - { name: archived, label: Archived }
+      - name: placeholder
+        label: Placeholder content
+        type: boolean
+        default: false
+
+  - name: education
+    label: "Résumé: Education"
+    type: collection
+    path: src/content/education
+    format: yaml-frontmatter
+    filename: "{primary}.md"
+    view:
+      fields: [qualification, institution, end]
+      primary: qualification
+    fields:
+      - name: qualification
+        label: Qualification
+        type: string
+        required: true
+      - name: institution
+        label: Institution
+        type: string
+        required: true
+      - name: field
+        label: Field of study
+        type: string
+      - name: location
+        label: Location
+        type: string
+      - name: start
+        label: Start date
+        type: date
+        default: ""
+        options:
+          format: yyyy-MM-dd
+      - name: end
+        label: End date
+        type: date
+        default: ""
+        options:
+          format: yyyy-MM-dd
+      - name: description
+        label: Notes
+        type: text
+      - name: url
+        label: Link
+        type: string
+      - name: order
+        label: Display order
+        type: number
+        default: 100
+      - name: status
+        label: Status
+        type: select
+        default: published
+        options:
+          values:
+            - { name: published, label: Published }
+            - { name: draft, label: Draft }
+            - { name: archived, label: Archived }
+      - name: placeholder
+        label: Placeholder content
+        type: boolean
+        default: false
+
+  - name: recognition
+    label: "Résumé: Awards, certifications & recognition"
+    type: collection
+    path: src/content/recognition
+    format: yaml-frontmatter
+    filename: "{primary}.md"
+    view:
+      fields: [title, type, date]
+      primary: title
+      default:
+        sort: date
+        order: desc
+    fields:
+      - name: title
+        label: Title
+        type: string
+        required: true
+      - name: type
+        label: Type
+        type: select
+        default: award
+        options:
+          values:
+            - { name: award, label: Award }
+            - { name: certification, label: Certification }
+            - { name: publication, label: Publication }
+            - { name: feature, label: Feature (e.g. ArtStation / magazine) }
+            - { name: exhibition, label: Exhibition }
+            - { name: speaking, label: Talk / speaking }
+            - { name: other, label: Other }
+      - name: issuer
+        label: Issuer / publication
+        type: string
+      - name: date
+        label: Date
+        type: date
+        default: ""
+        options:
+          format: yyyy-MM-dd
+      - name: url
+        label: Link
+        type: string
+      - name: description
+        label: Description
+        type: text
+      - name: image
+        label: Image (optional)
+        component: artImage
+      - name: featured
+        label: Show on homepage
+        type: boolean
+        default: true
+      - name: status
+        label: Status
+        type: select
+        default: published
+        options:
+          values:
+            - { name: published, label: Published }
+            - { name: draft, label: Draft }
+            - { name: archived, label: Archived }
+      - name: placeholder
+        label: Placeholder content
+        type: boolean
+        default: false
+
+  - name: skills
+    label: "Résumé: Skills & software"
+    type: file
+    path: src/data/skills.json
+    format: json
+    fields:
+      - name: groups
+        label: Skill groups
+        type: object
+        list: { collapsible: { collapsed: true, summary: "{title}" } }
+        fields:
+          - name: title
+            label: Group title
+            type: string
+          - name: kind
+            label: Kind
+            type: select
+            default: technical
+            description: "Software groups appear in the About page toolkit; Leadership appears as its own résumé section."
+            options:
+              values:
+                - { name: software, label: Software }
+                - { name: technical, label: Technical skills }
+                - { name: artistic, label: Artistic competencies }
+                - { name: leadership, label: Leadership }
+                - { name: other, label: Other }
+          - name: items
+            label: Skills
+            type: string
+            list: true
+          - name: placeholder
+            label: Placeholder content
+            type: boolean
+            default: false
+
+  # ---------------------------------------------------------------------------
+  # PROFILE & PAGES
+  # ---------------------------------------------------------------------------
+  - name: profile
+    label: "Profile & contact"
+    type: file
+    path: src/data/profile.json
+    format: json
+    fields:
+      - name: name
+        label: Name
+        type: string
+        required: true
+      - name: title
+        label: Professional title
+        type: string
+        required: true
+      - name: tagline
+        label: Tagline
+        type: text
+        description: Short introduction used on the homepage and in search results.
+      - name: summary
+        label: Professional summary (résumé)
+        type: text
+      - name: bio
+        label: Biography (About page)
+        type: text
+        description: Separate paragraphs with an empty line.
+      - name: location
+        label: Location
+        type: string
+      - name: email
+        label: Professional email
+        type: string
+      - name: phone
+        label: Phone (résumé only, optional)
+        type: string
+      - name: availability
+        label: Availability
+        type: object
+        fields:
+          - name: status
+            label: Status
+            type: select
+            default: hidden
+            options:
+              values:
+                - { name: open, label: Open to opportunities }
+                - { name: limited, label: Limited availability }
+                - { name: unavailable, label: Not available }
+                - { name: hidden, label: Don't show }
+          - name: message
+            label: Custom message
+            type: string
+      - name: employmentPreferences
+        label: Employment preferences
+        type: string
+        list: true
+        description: e.g. Full-time, Contract, Remote, Open to relocation.
+      - name: languages
+        label: Languages
+        type: object
+        list: true
+        fields:
+          - name: name
+            label: Language
+            type: string
+          - name: proficiency
+            label: Proficiency
+            type: string
+      - name: socials
+        label: Social & portfolio links
+        type: object
+        list: { collapsible: { collapsed: true, summary: "{label}" } }
+        fields:
+          - name: platform
+            label: Platform
+            type: select
+            options:
+              values:
+                - { name: artstation, label: ArtStation }
+                - { name: linkedin, label: LinkedIn }
+                - { name: github, label: GitHub }
+                - { name: instagram, label: Instagram }
+                - { name: x, label: X / Twitter }
+                - { name: youtube, label: YouTube }
+                - { name: vimeo, label: Vimeo }
+                - { name: sketchfab, label: Sketchfab }
+                - { name: behance, label: Behance }
+                - { name: website, label: Website }
+                - { name: other, label: Other }
+          - name: label
+            label: Label
+            type: string
+          - name: url
+            label: URL
+            type: string
+
+  - name: home
+    label: "Page: Home"
+    type: file
+    path: src/data/home.json
+    format: json
+    fields:
+      - name: hero
+        label: Hero
+        type: object
+        fields:
+          - name: image
+            label: Hero artwork
+            type: object
+            fields:
+              - name: image
+                label: Image
+                type: image
+                options:
+                  media: site
+              - name: url
+                label: …or external image URL
+                type: string
+              - name: alt
+                label: Alt text
+                type: string
+          - name: eyebrow
+            label: Small label above the name
+            type: string
+          - name: heading
+            label: Heading (defaults to your name)
+            type: string
+          - name: subheading
+            label: Sub-heading (defaults to your title)
+            type: string
+          - name: intro
+            label: Introduction
+            type: text
+          - name: focus
+            label: Image focus point
+            type: select
+            default: center
+            options:
+              values: [center, top, bottom, left, right]
+      - name: selectedWork
+        label: Selected work
+        type: object
+        fields:
+          - name: title
+            label: Section title
+            type: string
+          - name: intro
+            label: Intro
+            type: text
+          - name: projects
+            label: Projects to show (leave empty to use Featured projects)
+            type: reference
+            options:
+              collection: projects
+              multiple: true
+              search: title
+              label: "{title}"
+          - name: limit
+            label: Maximum number of projects
+            type: number
+            default: 6
+      - name: sections
+        label: Show sections
+        type: object
+        fields:
+          - { name: selectedWork, label: Selected work, type: boolean, default: true }
+          - { name: stats, label: Career statistics, type: boolean, default: true }
+          - { name: games, label: Shipped titles, type: boolean, default: true }
+          - { name: experience, label: Experience overview, type: boolean, default: true }
+          - { name: recognition, label: Recognition, type: boolean, default: true }
+          - { name: contact, label: Contact, type: boolean, default: true }
+      - name: contactHeading
+        label: Contact heading
+        type: string
+      - name: contactText
+        label: Contact text
+        type: text
+
+  - name: about
+    label: "Page: About"
+    type: file
+    path: src/data/about.json
+    format: json
+    fields:
+      - name: portrait
+        label: Artist photograph (optional)
+        type: object
+        fields:
+          - name: image
+            label: Image
+            type: image
+            options:
+              media: site
+          - name: alt
+            label: Alt text
+            type: string
+      - name: intro
+        label: Page heading
+        type: string
+      - name: philosophy
+        label: Artistic philosophy
+        type: text
+      - name: specialization
+        label: ZBrush specialisation
+        type: text
+      - name: highlights
+        label: Career highlights
+        type: string
+        list: true
+      - name: workflow
+        label: Production workflow steps
+        type: object
+        list: true
+        fields:
+          - name: title
+            label: Step
+            type: string
+          - name: description
+            label: Description
+            type: text
+      - name: interests
+        label: Professional interests
+        type: string
+        list: true
+
+  - name: navigation
+    label: "Site: Navigation"
+    type: file
+    path: src/data/navigation.json
+    format: json
+    fields:
+      - name: items
+        label: Menu items
+        type: object
+        list: true
+        fields:
+          - name: label
+            label: Label
+            type: string
+          - name: href
+            label: Link (e.g. /portfolio)
+            type: string
+          - name: header
+            label: Show in header
+            type: boolean
+            default: true
+          - name: footer
+            label: Show in footer
+            type: boolean
+            default: true
+
+  - name: settings
+    label: "Site: Settings & SEO"
+    type: file
+    path: src/data/settings.json
+    format: json
+    fields:
+      - name: siteTitle
+        label: Site title
+        type: string
+        required: true
+      - name: description
+        label: Site description (search engines)
+        type: text
+        required: true
+      - name: keywords
+        label: Keywords
+        type: string
+        list: true
+      - name: locale
+        label: Language code
+        type: string
+        default: en
+      - name: ogImage
+        label: Social sharing image
+        type: object
+        fields:
+          - name: image
+            label: Image
+            type: image
+            options:
+              media: site
+          - name: alt
+            label: Alt text
+            type: string
+      - name: hidePlaceholders
+        label: Hide all placeholder content
+        type: boolean
+        default: false
+        description: Tick to hide every item still marked as placeholder on the live site.
+      - name: resume
+        label: Résumé PDF
+        type: object
+        fields:
+          - name: pdfEnabled
+            label: Generate PDF automatically
+            type: boolean
+            default: true
+          - name: pdfFileName
+            label: PDF file name
+            type: string
+            default: Parth-Dhulia-Resume.pdf
+          - name: customPdf
+            label: Use my own PDF instead (optional)
+            type: file
+            options:
+              media: documents
+          - name: showEmail
+            label: Show email on résumé
+            type: boolean
+            default: true
+          - name: showPhone
+            label: Show phone on résumé
+            type: boolean
+            default: false
+      - name: cms
+        label: Editor link
+        type: object
+        fields:
+          - name: url
+            label: CMS URL
+            type: string
+          - name: showAdminLink
+            label: Show "Edit website" link in footer
+            type: boolean
+            default: true
+      - name: footerNote
+        label: Footer note
+        type: string
+      - name: rightsNotice
+        label: Copyright & rights notice
+        type: text

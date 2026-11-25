@@ -1,0 +1,313 @@
+---
+/**
+ * Online résumé — generated entirely from the same content collections that
+ * power the rest of the site (single source of truth). The print stylesheet
+ * turns this page into an A4 document, and CI renders it to PDF.
+ */
+import '@/styles/print.css';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Icon from '@/components/Icon.astro';
+import PlaceholderBadge from '@/components/PlaceholderBadge.astro';
+import ResumeSection from '@/components/resume/ResumeSection.astro';
+import {
+  getCareerStats,
+  getEducation,
+  getExperience,
+  getGames,
+  getProfile,
+  getRecognition,
+  getResumePdfPath,
+  getSettings,
+  getSkills,
+  RECOGNITION_LABELS,
+} from '@/lib/content';
+import { formatMonthYear, formatRange, formatYear } from '@/lib/dates';
+import { formatDuration, periodMonths } from '@/lib/experience';
+import { absoluteUrl, url } from '@/lib/site';
+import { personLd } from '@/lib/structured-data';
+
+const [profile, settings, jobs, games, education, recognition, skills, stats, pdf] = await Promise.all([
+  getProfile(),
+  getSettings(),
+  getExperience(),
+  getGames(),
+  getEducation(),
+  getRecognition(),
+  getSkills(),
+  getCareerStats(),
+  getResumePdfPath(),
+]);
+
+const gameTitles = new Map(games.map((g) => [g.id, g.data.title]));
+const certifications = recognition.filter((r) => r.data.type === 'certification');
+const awards = recognition.filter((r) => r.data.type === 'award');
+const publications = recognition.filter((r) => !['certification', 'award'].includes(r.data.type));
+const skillGroups = skills.groups.filter((g) => g.kind !== 'leadership');
+const leadershipGroups = skills.groups.filter((g) => g.kind === 'leadership');
+const portfolioUrl = absoluteUrl('/', Astro.site);
+const updated = formatMonthYear(new Date().toISOString().slice(0, 10));
+
+type ContactItem = { icon: 'mail' | 'other' | 'pin' | 'globe' | 'artstation' | 'linkedin'; text: string; href: string | undefined };
+const tidy = (u: string) => u.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+const contact: ContactItem[] = [];
+if (settings.resume.showEmail && profile.email) contact.push({ icon: 'mail', text: profile.email, href: `mailto:${profile.email}` });
+if (settings.resume.showPhone && profile.phone) contact.push({ icon: 'other', text: profile.phone, href: `tel:${profile.phone.replace(/\s/g, '')}` });
+if (profile.location) contact.push({ icon: 'pin', text: profile.location, href: undefined });
+contact.push({ icon: 'globe', text: tidy(portfolioUrl), href: portfolioUrl });
+for (const s of profile.socials) {
+  if (s.platform === 'artstation' || s.platform === 'linkedin') contact.push({ icon: s.platform, text: tidy(s.url), href: s.url });
+}
+---
+
+<BaseLayout
+  title="Résumé"
+  description={`Résumé of ${profile.name}, ${profile.title}. Experience, shipped game credits, skills and education.`}
+  type="profile"
+  jsonLd={personLd(profile, Astro.site, { jobs })}
+>
+  <div class="resume container-page max-w-6xl pt-12 md:pt-20">
+    <header class="resume-header grid gap-8 pb-12 md:grid-cols-[1fr_auto] md:items-end">
+      <div>
+        <p class="label no-print mb-4 flex items-center gap-3">
+          <span class="inline-block h-px w-8 bg-copper-500" aria-hidden="true"></span>Résumé
+        </p>
+        <h1 class="resume-name display text-display-lg">{profile.name}</h1>
+        <p class="resume-title mt-4 font-mono text-sm tracking-[0.16em] text-copper-400 uppercase">{profile.title}</p>
+        <ul class="resume-contact mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm text-bone-300">
+          {
+            contact.map((c) => (
+              <li class="flex items-center gap-2">
+                <Icon name={c.icon} size={14} class="text-bone-500" />
+                {c.href ? (
+                  <a href={c.href} class="hover:text-bone-50">
+                    {c.text}
+                  </a>
+                ) : (
+                  <span>{c.text}</span>
+                )}
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+      <div class="no-print flex flex-wrap gap-3">
+        {
+          pdf && (
+            <a href={url(pdf)} class="btn btn-primary" download>
+              <Icon name="download" size={16} /> Download PDF
+            </a>
+          )
+        }
+        <button type="button" class="btn btn-outline" data-print>
+          <Icon name="printer" size={16} /> Print / Save as PDF
+        </button>
+      </div>
+    </header>
+
+    {
+      (profile.summary || stats.months > 0) && (
+        <ResumeSection title="Profile" id="r-profile">
+          {profile.summary && <p class="resume-summary max-w-3xl text-lg leading-relaxed text-bone-100">{profile.summary}</p>}
+          {stats.months > 0 && (
+            <p class="resume-meta label mt-4">
+              {formatDuration(stats.months)} professional experience
+              {stats.shippedTitles > 0 && ` · ${stats.shippedTitles} shipped ${stats.shippedTitles === 1 ? 'title' : 'titles'}`}
+            </p>
+          )}
+        </ResumeSection>
+      )
+    }
+
+    {
+      jobs.length > 0 && (
+        <ResumeSection title="Experience" id="r-experience">
+          <div class="space-y-10">
+            {jobs.map((job) => (
+              <div class="resume-entry">
+                <div class="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+                  <h3 class="display flex flex-wrap items-center gap-3 text-2xl">
+                    {job.data.role}
+                    <PlaceholderBadge show={job.data.placeholder} />
+                  </h3>
+                  <p class="resume-meta label text-bone-300">
+                    {formatRange(job.data.start, job.data.end, job.isCurrent)}
+                    <span class="text-bone-500"> · {formatDuration(periodMonths({ start: job.data.start, end: job.data.end, current: job.isCurrent }))}</span>
+                  </p>
+                </div>
+                <p class="mt-1 text-bone-300">
+                  {job.data.company}
+                  {job.data.location && <span class="text-bone-500"> · {job.data.location}</span>}
+                  {job.data.employmentType !== 'full-time' && job.data.employmentType !== 'other' && (
+                    <span class="text-bone-500 capitalize"> · {job.data.employmentType.replace('-', ' ')}</span>
+                  )}
+                </p>
+                {job.data.summary && <p class="mt-3 max-w-3xl text-bone-300">{job.data.summary}</p>}
+                {[...job.data.responsibilities, ...job.data.achievements, ...job.data.leadership].length > 0 && (
+                  <ul class="resume-bullets prose-art mt-3 !max-w-3xl space-y-1 !text-base">
+                    {job.data.responsibilities.map((r) => (
+                      <li>{r}</li>
+                    ))}
+                    {job.data.achievements.map((r) => (
+                      <li>{r}</li>
+                    ))}
+                    {job.data.leadership.map((r) => (
+                      <li>{r}</li>
+                    ))}
+                  </ul>
+                )}
+                {job.data.games.some((id) => gameTitles.has(id)) && (
+                  <p class="resume-meta mt-3 text-sm text-bone-500">
+                    <span class="label mr-2">Shipped</span>
+                    {job.data.games
+                      .map((id) => gameTitles.get(id))
+                      .filter(Boolean)
+                      .join(' · ')}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        </ResumeSection>
+      )
+    }
+
+    {
+      games.length > 0 && (
+        <ResumeSection title="Shipped titles" id="r-games">
+          <ul class="divide-y divide-ink-700">
+            {games.map((g) => (
+              <li class="resume-entry grid gap-1 py-3 first:pt-0 sm:grid-cols-[1fr_auto] sm:gap-6">
+                <div>
+                  <span class="text-bone-50">{g.data.title}</span>
+                  {g.data.role && <span class="text-bone-300"> — {g.data.role}</span>}
+                  <PlaceholderBadge show={g.data.placeholder} class="ml-2" />
+                  {(g.data.studio || g.data.platforms.length > 0) && (
+                    <p class="resume-meta text-sm text-bone-500">
+                      {[g.data.studio, g.data.platforms.join(', ')].filter(Boolean).join(' · ')}
+                    </p>
+                  )}
+                </div>
+                {g.data.year && <span class="resume-meta label">{g.data.year}</span>}
+              </li>
+            ))}
+          </ul>
+        </ResumeSection>
+      )
+    }
+
+    {
+      skillGroups.length > 0 && (
+        <ResumeSection title="Skills" id="r-skills">
+          <div class="space-y-5">
+            {skillGroups.map((g) => (
+              <div class="resume-entry grid gap-2 sm:grid-cols-[11rem_1fr] sm:gap-6">
+                <h3 class="resume-meta label pt-1 !text-[0.6875rem] text-bone-300">{g.title}</h3>
+                <ul class="resume-tags flex flex-wrap gap-2">
+                  {g.items.map((s) => (
+                    <li class="border border-ink-700 px-2.5 py-1 text-sm text-bone-100">{s}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </ResumeSection>
+      )
+    }
+
+    {
+      leadershipGroups.length > 0 && (
+        <ResumeSection title="Leadership" id="r-leadership">
+          <ul class="resume-bullets prose-art !max-w-3xl space-y-1 !text-base">
+            {leadershipGroups.flatMap((g) => g.items).map((s) => (
+              <li>{s}</li>
+            ))}
+          </ul>
+        </ResumeSection>
+      )
+    }
+
+    {
+      education.length > 0 && (
+        <ResumeSection title="Education" id="r-education">
+          <div class="space-y-6">
+            {education.map((e) => (
+              <div class="resume-entry">
+                <div class="flex flex-wrap items-baseline justify-between gap-x-6">
+                  <h3 class="display flex flex-wrap items-center gap-3 text-xl">
+                    {e.data.qualification}
+                    <PlaceholderBadge show={e.data.placeholder} />
+                  </h3>
+                  <p class="resume-meta label">{formatRange(e.data.start, e.data.end, false, { yearOnly: true })}</p>
+                </div>
+                <p class="mt-1 text-bone-300">
+                  {e.data.institution}
+                  {e.data.field && <span class="text-bone-500"> · {e.data.field}</span>}
+                  {e.data.location && <span class="text-bone-500"> · {e.data.location}</span>}
+                </p>
+                {e.data.description && <p class="mt-2 text-sm text-bone-500">{e.data.description}</p>}
+              </div>
+            ))}
+          </div>
+        </ResumeSection>
+      )
+    }
+
+    {
+      [
+        { title: 'Certifications', id: 'r-certs', items: certifications },
+        { title: 'Awards', id: 'r-awards', items: awards },
+        { title: 'Publications & recognition', id: 'r-recognition', items: publications },
+      ]
+        .filter((g) => g.items.length > 0)
+        .map((group) => (
+          <ResumeSection title={group.title} id={group.id}>
+            <ul class="space-y-3">
+              {group.items.map((r) => (
+                <li class="resume-entry flex flex-wrap items-baseline justify-between gap-x-6">
+                  <span>
+                    {r.data.url ? (
+                      <a href={r.data.url} class="text-bone-50 link-underline" target="_blank" rel="noopener">
+                        {r.data.title}
+                      </a>
+                    ) : (
+                      <span class="text-bone-50">{r.data.title}</span>
+                    )}
+                    {r.data.issuer && <span class="text-bone-300"> — {r.data.issuer}</span>}
+                    {group.id === 'r-recognition' && <span class="resume-meta text-bone-500"> ({RECOGNITION_LABELS[r.data.type]})</span>}
+                    <PlaceholderBadge show={r.data.placeholder} class="ml-2" />
+                  </span>
+                  <span class="resume-meta label">{formatYear(r.data.date)}</span>
+                </li>
+              ))}
+            </ul>
+          </ResumeSection>
+        ))
+    }
+
+    {
+      profile.languages.length > 0 && (
+        <ResumeSection title="Languages" id="r-languages">
+          <ul class="resume-tags flex flex-wrap gap-x-8 gap-y-2">
+            {profile.languages.map((l) => (
+              <li class="text-bone-100">
+                {l.name}
+                {l.proficiency && <span class="text-bone-500"> — {l.proficiency}</span>}
+              </li>
+            ))}
+          </ul>
+        </ResumeSection>
+      )
+    }
+
+    <p class="resume-print-footer hidden">
+      Portfolio: {portfolioUrl} · Updated {updated}
+    </p>
+  </div>
+</BaseLayout>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('[data-print]').forEach((b) => b.addEventListener('click', () => window.print()));
+  if (location.hash === '#print') {
+    window.addEventListener('load', () => setTimeout(() => window.print(), 300), { once: true });
+  }
+</script>

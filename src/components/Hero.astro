@@ -1,0 +1,68 @@
+---
+/** Full-bleed cinematic hero. Artwork first; type sits in a calm lower-left zone. */
+import ArtImage from './ArtImage.astro';
+import Icon from './Icon.astro';
+import PlaceholderBadge from './PlaceholderBadge.astro';
+import { url } from '@/lib/site';
+
+interface Props {
+  image: { src: string; alt: string } | undefined;
+  eyebrow?: string | undefined;
+  heading: string;
+  subheading?: string | undefined;
+  intro?: string | undefined;
+  focus?: 'center' | 'top' | 'bottom' | 'left' | 'right';
+  pdfHref?: string | undefined;
+  isPlaceholderImage?: boolean;
+}
+
+const { image, eyebrow, heading, subheading, intro, focus = 'center', pdfHref, isPlaceholderImage } = Astro.props;
+const words = heading.trim().split(/\s+/);
+---
+
+<section class="relative isolate flex min-h-[92svh] items-end overflow-hidden bg-ink-950" aria-labelledby="hero-title">
+  <div class="absolute inset-0 -z-10">
+    <ArtImage
+      src={image?.src}
+      alt={image?.alt ?? ''}
+      class="h-full w-full"
+      aspect="auto"
+      widths={[768, 1280, 1920, 2560]}
+      sizes="100vw"
+      position={focus}
+      priority
+      quality={82}
+    />
+    <!-- Legibility scrim: only where the type sits. -->
+    <div class="absolute inset-0 bg-[linear-gradient(to_top,rgb(11_10_9/0.95)_0%,rgb(11_10_9/0.55)_32%,transparent_62%)]" aria-hidden="true"></div>
+    <div class="absolute inset-0 bg-[linear-gradient(to_right,rgb(11_10_9/0.55)_0%,transparent_55%)]" aria-hidden="true"></div>
+  </div>
+
+  <div class="container-page w-full pt-32 pb-14 md:pb-20">
+    <div class="max-w-5xl">
+      <div class="mb-6 flex flex-wrap items-center gap-3">
+        {eyebrow && (
+          <p class="label flex items-center gap-3 text-bone-300">
+            <span class="inline-block h-px w-8 bg-copper-500" aria-hidden="true"></span>{eyebrow}
+          </p>
+        )}
+        <PlaceholderBadge show={isPlaceholderImage} text="Placeholder artwork" />
+      </div>
+      <h1 id="hero-title" class="display text-display-xl text-bone-50">
+        {words.map((w, i) => (i === words.length - 1 ? <span class="italic text-copper-300">{w}</span> : <>{w} </>))}
+      </h1>
+      {subheading && <p class="mt-6 font-mono text-sm tracking-[0.18em] text-bone-100 uppercase md:text-base">{subheading}</p>}
+      {intro && <p class="mt-6 max-w-xl text-lg leading-relaxed text-bone-300">{intro}</p>}
+
+      <div class="mt-10 flex flex-wrap gap-3">
+        <a href={url('/portfolio')} class="btn btn-primary">
+          View portfolio <Icon name="arrow-right" size={16} />
+        </a>
+        <a href={url('/resume')} class="btn btn-outline">View résumé</a>
+        <a href={pdfHref ? url(pdfHref) : url('/resume#print')} class="btn btn-ghost" download={pdfHref ? '' : undefined}>
+          <Icon name="download" size={16} /> Download CV
+        </a>
+      </div>
+    </div>
+  </div>
+</section>

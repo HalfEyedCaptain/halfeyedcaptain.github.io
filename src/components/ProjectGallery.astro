@@ -1,0 +1,91 @@
+---
+/**
+ * A titled set of artwork images. Images keep their natural aspect ratio.
+ * Each image opens in the fullscreen lightbox; the original file can be
+ * opened from there.
+ */
+import { getImage } from 'astro:assets';
+import ArtImage from './ArtImage.astro';
+import Icon from './Icon.astro';
+import type { ImageRef } from '@/lib/schema-helpers';
+import { resolveImage } from '@/lib/images';
+
+interface Props {
+  title: string;
+  label?: string;
+  images: ImageRef[];
+  group: string;
+  /** 'stack' = full-width renders; 'grid' = two-up masonry for breakdowns. */
+  layout?: 'stack' | 'grid';
+  projectTitle: string;
+  id?: string;
+}
+
+const { title, label, images, group, layout = 'grid', projectTitle, id } = Astro.props;
+
+const items = await Promise.all(
+  images.map(async (img, i) => {
+    const r = resolveImage(img.src);
+    let full: string | undefined;
+    let original: string | undefined;
+    if (r?.kind === 'local') {
+      full = (await getImage({ src: r.meta, width: Math.min(r.meta.width, 2400), format: 'webp', quality: 86 })).src;
+      original = r.meta.src;
+    } else if (r?.kind === 'remote') {
+      full = original = r.src;
+    }
+    const alt = img.alt || `${projectTitle} — ${title} ${i + 1}`;
+    return { ...img, alt, full, original };
+  }),
+);
+const sizes = layout === 'stack' ? '(min-width: 1440px) 1360px, 100vw' : '(min-width: 1024px) 45vw, 100vw';
+---
+
+{
+  items.length > 0 && (
+    <section class="container-page" aria-labelledby={id} data-reveal>
+      <header class="mb-8 flex items-baseline gap-4 border-b border-ink-700 pb-4">
+        {label && <span class="label">{label}</span>}
+        <h2 id={id} class="display text-display-sm">
+          {title}
+        </h2>
+        <span class="label ml-auto">{String(items.length).padStart(2, '0')}</span>
+      </header>
+
+      <div class:list={[layout === 'stack' ? 'space-y-6 md:space-y-10' : 'columns-1 gap-6 md:columns-2 [&>*]:mb-6']}>
+        {items.map((img) => (
+          <figure class="break-inside-avoid">
+            {img.full ? (
+              <button
+                type="button"
+                class="group relative block w-full cursor-zoom-in text-left"
+                data-lightbox-item
+                data-group={group}
+                data-src={img.full}
+                data-original={img.original}
+                data-alt={img.alt}
+                data-caption={img.caption ?? ''}
+                aria-label={`View fullscreen: ${img.alt}`}
+              >
+                <ArtImage
+                  src={img.src}
+                  alt={img.alt}
+                  sizes={sizes}
+                  widths={[640, 960, 1280, 1920, 2400]}
+                  fit="contain"
+                  maxHeight={layout === 'stack' ? '92svh' : undefined}
+                />
+                <span class="absolute right-3 bottom-3 inline-flex h-9 w-9 items-center justify-center bg-ink-950/70 text-bone-100 opacity-0 backdrop-blur transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+                  <Icon name="expand" size={16} />
+                </span>
+              </button>
+            ) : (
+              <ArtImage src={img.src} alt={img.alt} sizes={sizes} />
+            )}
+            {img.caption && <figcaption class="label mt-3">{img.caption}</figcaption>}
+          </figure>
+        ))}
+      </div>
+    </section>
+  )
+}

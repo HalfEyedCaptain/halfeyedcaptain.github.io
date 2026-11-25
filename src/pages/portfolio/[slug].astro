@@ -1,0 +1,298 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { getImage } from 'astro:assets';
+import { getEntry, render } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import ArtImage from '@/components/ArtImage.astro';
+import Icon from '@/components/Icon.astro';
+import Lightbox from '@/components/Lightbox.astro';
+import ModelViewer from '@/components/ModelViewer.astro';
+import PlaceholderBadge from '@/components/PlaceholderBadge.astro';
+import ProjectGallery from '@/components/ProjectGallery.astro';
+import VideoEmbed from '@/components/VideoEmbed.astro';
+import { getGames, getProfile, getProjects, type Project } from '@/lib/content';
+import { formatMonthYear } from '@/lib/dates';
+import { localImage } from '@/lib/images';
+import { absoluteUrl, url } from '@/lib/site';
+import { creativeWorkLd } from '@/lib/structured-data';
+
+export const getStaticPaths = (async () => {
+  const projects = await getProjects();
+  return projects.map((project, i) => ({
+    params: { slug: project.slug },
+    props: {
+      project,
+      prev: projects[i - 1] ?? projects.at(-1),
+      next: projects[i + 1] ?? projects[0],
+      total: projects.length,
+      index: i,
+    },
+  }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+  project: Project;
+  prev: Project | undefined;
+  next: Project | undefined;
+  total: number;
+  index: number;
+}
+
+const { project, prev, next, total, index } = Astro.props;
+const d = project.data;
+const profile = await getProfile();
+const entry = await getEntry('projects', project.id);
+const { Content } = entry ? await render(entry) : { Content: undefined };
+const hasBody = Boolean(entry?.body?.trim());
+
+const hero = d.hero ?? d.thumbnail ?? d.renders[0];
+const game = d.relatedGame ? (await getGames()).find((g) => g.id === d.relatedGame) : undefined;
+
+let ldImage: string | undefined;
+const heroMeta = localImage(hero?.src);
+if (heroMeta) ldImage = absoluteUrl((await getImage({ src: heroMeta, width: 1600, format: 'jpg' })).src, Astro.site);
+
+const facts = [
+  project.categoryInfo && { k: 'Category', v: project.categoryInfo.label },
+  { k: 'Type', v: d.classification === 'professional' ? 'Professional' : 'Personal' },
+  d.studio && { k: 'Studio / client', v: d.studio },
+  d.completed && { k: 'Completed', v: formatMonthYear(d.completed) },
+].filter((x): x is { k: string; v: string } => Boolean(x));
+
+const sections = [
+  { key: 'renders', title: 'Final renders', label: 'Renders', images: d.renders, layout: 'stack' as const },
+  { key: 'gallery', title: 'Gallery', label: 'Gallery', images: d.gallery, layout: 'grid' as const },
+  { key: 'sculpts', title: 'High-poly sculpt', label: 'ZBrush', images: d.sculpts, layout: 'grid' as const },
+  { key: 'topology', title: 'Wireframe & topology', label: 'Topology', images: d.topology, layout: 'grid' as const },
+  { key: 'textures', title: 'Texture breakdown', label: 'Textures', images: d.textures, layout: 'grid' as const },
+].filter((s) => s.images.length > 0);
+
+const pad = (n: number) => String(n).padStart(2, '0');
+---
+
+<BaseLayout
+  title={d.title}
+  description={d.summary ?? `${d.title} — character art by ${profile.name}.`}
+  image={hero?.src}
+  imageAlt={hero?.alt}
+  type="article"
+  noindex={d.status === 'draft'}
+  jsonLd={creativeWorkLd(project, profile, Astro.site, ldImage)}
+>
+  <article>
+    <!-- Hero -->
+    <header class="container-page pt-10 md:pt-16">
+      <nav aria-label="Breadcrumb" class="label mb-8 flex items-center gap-2">
+        <a href={url('/portfolio')} class="hover:text-bone-100">Portfolio</a>
+        <span aria-hidden="true">/</span>
+        {project.categoryInfo && (
+          <>
+            <a href={url(`/portfolio?category=${project.categoryInfo.id}`)} class="hover:text-bone-100">{project.categoryInfo.label}</a>
+            <span aria-hidden="true">/</span>
+          </>
+        )}
+        <span class="text-bone-300" aria-current="page">{pad(index + 1)} of {pad(total)}</span>
+      </nav>
+      <div class="flex flex-wrap items-center gap-3">
+        <PlaceholderBadge show={d.placeholder} />
+        {d.status === 'draft' && <span class="placeholder-badge !bg-bone-100">Draft — visible only in local preview</span>}
+      </div>
+      <h1 class="display mt-4 max-w-5xl text-display-lg">{d.title}</h1>
+      {d.summary && <p class="mt-6 max-w-2xl text-lg text-bone-300">{d.summary}</p>}
+    </header>
+
+    {
+      hero && (
+        <div class="mx-auto mt-12 max-w-[110rem] px-0 md:px-(--gutter)">
+          <button
+            type="button"
+            class="block w-full cursor-zoom-in"
+            data-lightbox-item
+            data-group="hero"
+            data-src={heroMeta ? (await getImage({ src: heroMeta, width: Math.min(heroMeta.width, 2400), format: 'webp', quality: 86 })).src : hero.src}
+            data-original={heroMeta?.src ?? hero.src}
+            data-alt={hero.alt || d.title}
+            data-caption={hero.caption ?? d.title}
+            aria-label={`View fullscreen: ${hero.alt || d.title}`}
+          >
+            <ArtImage src={hero.src} alt={hero.alt || d.title} widths={[768, 1280, 1920, 2560]} sizes="(min-width: 1760px) 1760px, 100vw" priority fit="contain" maxHeight="86svh" />
+          </button>
+        </div>
+      )
+    }
+
+    <!-- Overview -->
+    <div class="container-page mt-16 grid gap-12 md:mt-24 lg:grid-cols-[1fr_22rem] lg:gap-24">
+      <div>
+        {
+          hasBody && Content ? (
+            <div class="prose-art">
+              <Content />
+            </div>
+          ) : (
+            d.summary && <p class="prose-art">{d.summary}</p>
+          )
+        }
+      </div>
+
+      <aside class="space-y-8 lg:sticky lg:top-28 lg:self-start" aria-label="Project details">
+        <dl class="divide-y divide-ink-700 border-y border-ink-700">
+          {
+            facts.map((f) => (
+              <div class="flex justify-between gap-6 py-3">
+                <dt class="label">{f.k}</dt>
+                <dd class="text-right text-sm text-bone-100">{f.v}</dd>
+              </div>
+            ))
+          }
+          {
+            game && (
+              <div class="flex justify-between gap-6 py-3">
+                <dt class="label">Game</dt>
+                <dd class="text-right text-sm">
+                  <a href={url(`/games#${game.id}`)} class="text-bone-100 link-underline">
+                    {game.data.title}
+                  </a>
+                </dd>
+              </div>
+            )
+          }
+        </dl>
+
+        {
+          d.software.length > 0 && (
+            <div>
+              <h2 class="label mb-3">Software</h2>
+              <ul class="flex flex-wrap gap-2">
+                {d.software.map((s) => (
+                  <li class="border border-ink-700 px-3 py-1.5 text-sm">{s}</li>
+                ))}
+              </ul>
+            </div>
+          )
+        }
+
+        {
+          d.responsibilities.length > 0 && (
+            <div>
+              <h2 class="label mb-3">Responsibilities</h2>
+              <ul class="prose-art !text-sm">
+                {d.responsibilities.map((r) => (
+                  <li>{r}</li>
+                ))}
+              </ul>
+            </div>
+          )
+        }
+
+        {
+          d.credits.length > 0 && (
+            <div>
+              <h2 class="label mb-3">Credits</h2>
+              <ul class="space-y-2 text-sm">
+                {d.credits.map((c) => (
+                  <li>
+                    {c.role && <span class="text-bone-500">{c.role} — </span>}
+                    {c.url ? (
+                      <a href={c.url} class="text-bone-100 link-underline" target="_blank" rel="noopener">
+                        {c.name}
+                      </a>
+                    ) : (
+                      <span class="text-bone-100">{c.name}</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )
+        }
+
+        {
+          d.artstation && (
+            <a href={d.artstation} class="btn btn-outline w-full" target="_blank" rel="noopener">
+              <Icon name="artstation" size={16} /> View on ArtStation
+            </a>
+          )
+        }
+      </aside>
+    </div>
+
+    <!-- Artwork sections -->
+    <div class="mt-24 space-y-24 md:mt-32 md:space-y-32">
+      {
+        sections.map((s, i) => (
+          <ProjectGallery
+            id={`section-${s.key}`}
+            title={s.title}
+            label={pad(i + 1)}
+            images={s.images}
+            group={s.key}
+            layout={s.layout}
+            projectTitle={d.title}
+          />
+        ))
+      }
+
+      {
+        d.videos.length > 0 && (
+          <section class="container-page" aria-labelledby="section-video" data-reveal>
+            <header class="mb-8 flex items-baseline gap-4 border-b border-ink-700 pb-4">
+              <h2 id="section-video" class="display text-display-sm">
+                {d.videos.length > 1 ? 'Videos' : 'Video'}
+              </h2>
+            </header>
+            <div class="grid gap-10 lg:grid-cols-2">
+              {d.videos.map((v) => (
+                <VideoEmbed url={v.url} title={v.title} />
+              ))}
+            </div>
+          </section>
+        )
+      }
+
+      {
+        d.model && (
+          <section class="container-page" aria-labelledby="section-model" data-reveal>
+            <header class="mb-8 flex items-baseline gap-4 border-b border-ink-700 pb-4">
+              <h2 id="section-model" class="display text-display-sm">
+                Interactive 3D
+              </h2>
+            </header>
+            <ModelViewer src={d.model.src} alt={d.model.alt} poster={d.model.poster} autoRotate={d.model.autoRotate} />
+          </section>
+        )
+      }
+    </div>
+
+    {
+      d.copyright && (
+        <p class="container-page mt-20 text-xs text-bone-500">
+          {d.copyright}
+        </p>
+      )
+    }
+
+    <!-- Prev / next -->
+    {
+      total > 1 && prev && next && (
+        <nav class="container-page mt-24 grid border-t border-ink-700 md:grid-cols-2" aria-label="More projects">
+          <a href={url(`/portfolio/${prev.slug}`)} class="group flex items-center gap-5 py-10 md:border-r md:border-ink-700 md:pr-10" rel="prev">
+            <Icon name="arrow-left" size={20} class="shrink-0 text-bone-500 transition-transform group-hover:-translate-x-1 group-hover:text-copper-400" />
+            <span>
+              <span class="label block">Previous</span>
+              <span class="display mt-2 block text-2xl group-hover:text-copper-300">{prev.data.title}</span>
+            </span>
+          </a>
+          <a href={url(`/portfolio/${next.slug}`)} class="group flex items-center justify-end gap-5 border-t border-ink-700 py-10 text-right md:border-t-0 md:pl-10" rel="next">
+            <span>
+              <span class="label block">Next</span>
+              <span class="display mt-2 block text-2xl group-hover:text-copper-300">{next.data.title}</span>
+            </span>
+            <Icon name="arrow-right" size={20} class="shrink-0 text-bone-500 transition-transform group-hover:translate-x-1 group-hover:text-copper-400" />
+          </a>
+        </nav>
+      )
+    }
+  </article>
+  <Lightbox />
+</BaseLayout>

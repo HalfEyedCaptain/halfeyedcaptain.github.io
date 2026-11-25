@@ -1,0 +1,26 @@
+---
+/** A named group of skills. Deliberately no percentage bars or ratings. */
+import PlaceholderBadge from './PlaceholderBadge.astro';
+
+interface Props {
+  title: string;
+  items: string[];
+  placeholder?: boolean;
+  class?: string;
+}
+const { title, items, placeholder = false, class: className } = Astro.props;
+---
+
+<div class:list={['border-t border-ink-700 pt-5', className]}>
+  <div class="mb-4 flex items-center gap-3">
+    <h3 class="label text-bone-300">{title}</h3>
+    <PlaceholderBadge show={placeholder} />
+  </div>
+  <ul class="flex flex-wrap gap-2">
+    {
+      items.map((s) => (
+        <li class="border border-ink-700 px-3 py-1.5 text-sm text-bone-100">{s}</li>
+      ))
+    }
+  </ul>
+</div>

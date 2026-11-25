@@ -1,0 +1,29 @@
+{
+  "hero": {
+    "image": {
+      "image": "/src/assets/images/placeholder-hero.jpg",
+      "alt": "Placeholder hero artwork — replace with a signature character render"
+    },
+    "eyebrow": "Portfolio",
+    "heading": "",
+    "subheading": "",
+    "intro": "Character artist specialising in ZBrush digital sculpting and game character production.",
+    "focus": "center"
+  },
+  "selectedWork": {
+    "title": "Selected work",
+    "intro": "",
+    "projects": [],
+    "limit": 6
+  },
+  "sections": {
+    "selectedWork": true,
+    "stats": true,
+    "games": true,
+    "experience": true,
+    "recognition": true,
+    "contact": true
+  },
+  "contactHeading": "Let's build characters together",
+  "contactText": "Studios, art directors and recruiters — the best way to reach me is through ArtStation or the links below."
+}
