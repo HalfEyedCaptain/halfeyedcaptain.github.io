@@ -31,7 +31,7 @@ This guide is for you, Parth. You can update everything on the website from your
 
 1. Open **https://app.pagescms.org**. You can also click **Edit website** at the bottom of any page on your site.
 2. Click **Sign in with GitHub**, and use the GitHub account that owns the website repository.
-3. **The first time only:** Pages CMS asks you to install its GitHub App. Choose **Only select repositories** and pick `parthdhulia.github.io`.
+3. **The first time only:** Pages CMS asks you to install its GitHub App. Choose **Only select repositories** and pick `halfeyedcaptain.github.io`.
 4. Click the repository to open the editor. The sections on the left are what you can edit.
 
 Your website doesn't have its own login page. Signing in happens on Pages CMS with your GitHub account, and only people with access to your GitHub repository can make changes.
@@ -210,7 +210,7 @@ Don't upload source files (ZTL, PSD, SPP, EXR). They make the repository huge an
 
 Every save is recorded in GitHub's history, so nothing is ever truly lost.
 
-1. Open your repository on GitHub, e.g. `github.com/HalfEyedCaptain/parthdhulia.github.io`.
+1. Open your repository on GitHub, e.g. `github.com/halfeyedcaptain/halfeyedcaptain.github.io`.
 2. Click the **commits** count (the clock icon, near the top).
 3. Find the change by its date or description, open it, and you'll see exactly what changed.
 4. To restore an old version of a file: browse to the file, click **History**, open the version you want, and copy its contents back into the editor. Or ask your developer to *revert* the commit, which takes one click on GitHub.

@@ -134,7 +134,7 @@ npm install          # first time only
 | Task | Command |
 | --- | --- |
 | Install dependencies | `npm install` |
-| Start dev server (hot reload) | `npm run dev` → http://localhost:4321/parthdhulia.github.io/ |
+| Start dev server (hot reload) | `npm run dev` → http://localhost:4321/ |
 | Validate content + type-check + unit tests | `npm run validate` |
 | Type-check only | `npm run check` |
 | Unit tests only | `npm test` |
@@ -143,11 +143,11 @@ npm install          # first time only
 | Preview the production build | `npm run preview` |
 | Regenerate placeholder images | `npm run placeholders` |
 
-The dev server URL includes the base path because the site is configured as a GitHub *project* page. To develop at the root, run:
+The site is a GitHub *user* page, so it is served from the root (`/`). To test a sub-directory deployment (e.g. a project page), set a base path:
 
 ```bash
-BASE_PATH=/ npm run dev                 # macOS / Linux
-$env:BASE_PATH='/'; npm run dev         # Windows PowerShell
+BASE_PATH=/my-repo npm run dev              # macOS / Linux
+$env:BASE_PATH='/my-repo'; npm run dev      # Windows PowerShell
 ```
 
 Drafts (`status: draft`) are visible in `npm run dev` with a "Draft" badge, and hidden in production builds.
@@ -229,13 +229,13 @@ Triggers: pushes to `main` (including Pages CMS commits), pull requests (build o
 
 | Setup | Example URL | Base path |
 | --- | --- | --- |
-| Project page (current repo) | `https://halfeyedcaptain.github.io/parthdhulia.github.io/` | `/parthdhulia.github.io` |
-| User page (repo named `<user>.github.io`) | `https://<user>.github.io/` | `/` |
+| **User page (current repo: `halfeyedcaptain.github.io`)** | `https://halfeyedcaptain.github.io/` | `/` |
+| Project page (any other repo name) | `https://<user>.github.io/<repo>/` | `/<repo>` |
 | Custom domain | `https://www.example.com/` | `/` |
 
 Local defaults are set in [astro.config.mjs](astro.config.mjs) (`DEFAULT_SITE`, `DEFAULT_BASE`) and can be overridden with the `SITE_URL` / `BASE_PATH` environment variables. All internal links go through `url()` in [src/lib/site.ts](src/lib/site.ts), so they work under any base path.
 
-> **Note on the repo name.** This repository is `HalfEyedCaptain/parthdhulia.github.io`. Because the name doesn't match the owner (`halfeyedcaptain.github.io`), GitHub serves it as a **project page** under `/parthdhulia.github.io/`. To serve it at a domain root instead, either rename the repository to `halfeyedcaptain.github.io` or add a custom domain.
+> **Note on the repo name.** This repository is `halfeyedcaptain/halfeyedcaptain.github.io`. Because the name matches the owner, GitHub serves it as a **user page** at the domain root. If the repository is ever renamed to something else, it becomes a project page under `/<repo>/`. The workflow adapts automatically, but update `DEFAULT_BASE` in `astro.config.mjs` so local previews match.
 
 ---
 
@@ -250,7 +250,7 @@ Local defaults are set in [astro.config.mjs](astro.config.mjs) (`DEFAULT_SITE`, 
 1. The repository owner opens **https://app.pagescms.org** and signs in with GitHub.
 2. Install the **Pages CMS GitHub App** when prompted, and grant it access to **this repository only**.
 3. Open the repository in Pages CMS. It reads `.pages.yml` automatically.
-4. Optional: set the deep link in **Settings → Editor link** (currently `https://app.pagescms.org/HalfEyedCaptain/parthdhulia.github.io/main`). The footer's **Edit website** link points to `/admin/`, which links there.
+4. Optional: set the deep link in **Settings → Editor link** (currently `https://app.pagescms.org/halfeyedcaptain/halfeyedcaptain.github.io/main`). The footer's **Edit website** link points to `/admin/`, which links there.
 
 ### Limitations
 

@@ -34,7 +34,7 @@ if (resume.customPdf) {
 }
 
 const fileName = String(resume.pdfFileName || 'resume.pdf').replace(/[^a-zA-Z0-9._-]/g, '-');
-const rawBase = process.env.BASE_PATH ?? '/parthdhulia.github.io';
+const rawBase = process.env.BASE_PATH ?? '/';
 const base = rawBase === '' || rawBase === '/' ? '' : `/${rawBase.replace(/^\/+|\/+$/g, '')}`;
 
 if (!existsSync(join(dist, 'resume', 'index.html'))) {

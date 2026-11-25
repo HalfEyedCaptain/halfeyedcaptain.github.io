@@ -15,7 +15,7 @@ import tailwindcss from '@tailwindcss/vite';
  *     SITE_URL=https://example.com BASE_PATH=/ npm run build
  */
 const DEFAULT_SITE = 'https://halfeyedcaptain.github.io';
-const DEFAULT_BASE = '/parthdhulia.github.io';
+const DEFAULT_BASE = '/'; // user page (repo: halfeyedcaptain/halfeyedcaptain.github.io)
 
 const site = (process.env.SITE_URL || DEFAULT_SITE).replace(/\/+$/, '');
 const rawBase = process.env.BASE_PATH ?? DEFAULT_BASE;
